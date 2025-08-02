@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XPDTN Season 4 Survey Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            background: #1a1a1a;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0;
+            background: #1a1a1a;
+        }
+        
+        .content {
+            padding: 10px 20px 20px 20px;
+            background: #1a1a1a;
+        }
+        
+        .total-responses {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+            color: #ffffff;
+        }
+        
+        .total-label {
+            color: #9ca3af;
+            margin-right: 10px;
+        }
+        
+        .total-number {
+            color: #9F309F;
+            font-weight: 700;
+            font-size: 1.3em;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .survey-question {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #3a3a3a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 12px;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        .response-count {
+            color: #9ca3af;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+        
+        .responses-container {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 0;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .response-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 24px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            position: relative;
+            background: #1a1a1a;
+        }
+        
+        .response-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .response-content {
+            flex: 1;
+            margin-right: 20px;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .response-text {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 0;
+            font-size: 1.3em;
+        }
+        
+        .response-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            border-radius: 6px;
+        }
+        
+        .response-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9F309F, #7a2472);
+            transition: width 0.8s ease;
+            opacity: 0.8;
+            border-radius: 6px;
+        }
+        
+        .response-stats {
+            text-align: right;
+            flex-shrink: 0;
+            min-width: 90px;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .response-percentage {
+            color: #9F309F;
+            font-weight: 700;
+            font-size: 1.4em;
+        }
+        
+        .response-number {
+            color: #9ca3af;
+            font-size: 1em;
+            margin-top: 2px;
+        }
+        
+        .other-responses {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #3a3a3a;
+            margin-top: 15px;
+        }
+        
+        .other-title {
+            color: #9F309F;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .other-text {
+            color: #d1d5db;
+            line-height: 1.6;
+            font-size: 1em;
+        }
+        
+        .update-time {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.8em;
+            margin-top: 20px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="total-responses">
+                <span class="total-label">Total Responses:</span>
+                <span class="total-number" id="totalResponses">13</span>
+            </div>
+            
+            <div class="section">
+                <div class="survey-question">
+                    <h2 class="section-title">How are you using AI in your work today?</h2>
+                    <div class="response-count">13 responses</div>
+                    
+                    <div class="responses-container">
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 85%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Writing emails, captions, or campaign copy</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">85%</div>
+                                <div class="response-number">11 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 77%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Drafting or reviewing creative briefs</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">77%</div>
+                                <div class="response-number">10 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 46%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Analyzing campaign results</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">46%</div>
+                                <div class="response-number">6 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 38%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Discovering or researching creators</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">38%</div>
+                                <div class="response-number">5 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 15%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Generating images or video</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">15%</div>
+                                <div class="response-number">2 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 8%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">I'm not using AI at work yet</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">8%</div>
+                                <div class="response-number">1 response</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="other-responses">
+                        <div class="other-title">Other responses:</div>
+                        <div class="other-text">AI tools that speed up creative workflow like rotoscoping, Photoshop generative AI, Scripting, Creative Ideation</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="survey-question">
+                    <h2 class="section-title">What's your go-to AI tool?</h2>
+                    <div class="response-count">13 responses</div>
+                    
+                    <div class="responses-container">
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 62%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">ChatGPT</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">62%</div>
+                                <div class="response-number">8 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 23%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Claude</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">23%</div>
+                                <div class="response-number">3 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 23%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Gemini</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">23%</div>
+                                <div class="response-number">3 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 15%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Multiple tools</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">15%</div>
+                                <div class="response-number">2 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 8%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Other/Specialized tools</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">8%</div>
+                                <div class="response-number">1 response</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="survey-question">
+                    <h2 class="section-title">AI Confidence Level - Season Start (1-5 scale)</h2>
+                    <div class="response-count">13 responses</div>
+                    
+                    <div class="responses-container">
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 8%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">1 - Low confidence</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">8%</div>
+                                <div class="response-number">1 response</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 31%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">2 - Some confidence</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">31%</div>
+                                <div class="response-number">4 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 31%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">3 - Moderate confidence</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">31%</div>
+                                <div class="response-number">4 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 23%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">4 - High confidence</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">23%</div>
+                                <div class="response-number">3 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 8%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">5 - Very high confidence</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">8%</div>
+                                <div class="response-number">1 response</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="survey-question">
+                    <h2 class="section-title">What's your top priority for this season?</h2>
+                    <div class="response-count">13 responses</div>
+                    
+                    <div class="responses-container">
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 31%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Swapping tactics/tools with peers</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">31%</div>
+                                <div class="response-number">4 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 23%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Learning from guest speakers</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">23%</div>
+                                <div class="response-number">3 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 23%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Having a regular space to reflect and stay sharp</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">23%</div>
+                                <div class="response-number">3 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 15%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Connecting 1:1 with others in similar roles</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">15%</div>
+                                <div class="response-number">2 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 8%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Other priorities</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">8%</div>
+                                <div class="response-number">1 response</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="survey-question">
+                    <h2 class="section-title">Which areas of AI are you most curious about?</h2>
+                    <div class="response-count">13 responses</div>
+                    
+                    <div class="responses-container">
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 54%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">AI for creator discovery</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">54%</div>
+                                <div class="response-number">7 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 46%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">AI and the future of creator platforms</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">46%</div>
+                                <div class="response-number">6 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 38%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">AI assistants & internal tooling</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">38%</div>
+                                <div class="response-number">5 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 31%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">AI for reviewing creator content</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">31%</div>
+                                <div class="response-number">4 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 23%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">AI for campaign planning & briefing</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">23%</div>
+                                <div class="response-number">3 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 15%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">How creators themselves are using AI</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">15%</div>
+                                <div class="response-number">2 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 8%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Ethical implications / disclosure guidelines</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">8%</div>
+                                <div class="response-number">1 response</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="survey-question">
+                    <h2 class="section-title">What types of guests would you like to hear from?</h2>
+                    <div class="response-count">13 responses</div>
+                    
+                    <div class="responses-container">
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 77%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">CMOs/Heads of growth at brands (a level above most of us)</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">77%</div>
+                                <div class="response-number">10 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 69%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Creator marketing thought leaders</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">69%</div>
+                                <div class="response-number">9 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 46%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Creator partnerships peers with AI success stories</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">46%</div>
+                                <div class="response-number">6 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 31%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Founders of creator marketing platforms with AI success stories</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">31%</div>
+                                <div class="response-number">4 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 23%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Founders of AI-based tool companies</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">23%</div>
+                                <div class="response-number">3 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 15%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Forward-thinking talent managers</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">15%</div>
+                                <div class="response-number">2 responses</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="survey-question">
+                    <h2 class="section-title">Which areas of creator marketing would you test AI tools for?</h2>
+                    <div class="response-count">13 responses</div>
+                    
+                    <div class="responses-container">
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 62%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Creator Discovery & Vetting</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">62%</div>
+                                <div class="response-number">8 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 54%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Performance Analysis & Reporting</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">54%</div>
+                                <div class="response-number">7 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 46%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Competitor Monitoring & Trend Tracking</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">46%</div>
+                                <div class="response-number">6 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 38%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Outreach & Communication</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">38%</div>
+                                <div class="response-number">5 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 31%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Creative Co-Pilots for UGC</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">31%</div>
+                                <div class="response-number">4 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 31%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">Brief Generation & Campaign Planning</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">31%</div>
+                                <div class="response-number">4 responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: 23%;"></div>
