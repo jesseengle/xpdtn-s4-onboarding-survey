@@ -459,10 +459,10 @@
             
             // Process each question column, but skip certain columns
             const questions = [];
-            const skipColumns = ['respondent id', 'timestamp', 'submitted at', 'response id'];
+            const skipColumns = ['respondent id', 'submission id', 'timestamp', 'submitted at', 'response id'];
             
             headers.forEach((header, index) => {
-                if (header && header.trim() && !skipColumns.some(skip => header.toLowerCase().includes(skip))) {
+                if (header && header.trim() && !skipColumns.some(skip => header.toLowerCase().includes(skip.toLowerCase()))) {
                     const responses = {};
                     let totalResponses = 0;
                     let otherResponses = [];
@@ -598,7 +598,7 @@
             const skipColumns = ['respondent id', 'timestamp', 'submitted at', 'response id'];
             
             headers.forEach((header, index) => {
-                if (header && header.trim() && !skipColumns.some(skip => header.toLowerCase().includes(skip))) {
+                if (header && header.trim() && !skipColumns.some(skip => header.toLowerCase().includes(skip.toLowerCase()))) {
                     const responses = {};
                     let totalResponses = 0;
                     let otherResponses = [];
