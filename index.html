@@ -348,6 +348,28 @@
             }
         ];
 
+        // Function to normalize response text (combine similar responses)
+        function normalizeResponse(text) {
+            const normalized = text.toLowerCase().trim();
+            
+            // Normalize common AI tools
+            if (normalized.includes('chatgpt') || normalized.includes('chat gpt') || normalized === 'gpt') {
+                return 'ChatGPT';
+            }
+            if (normalized.includes('claude')) {
+                return 'Claude';
+            }
+            if (normalized.includes('gemini')) {
+                return 'Gemini';
+            }
+            if (normalized.includes('gamma')) {
+                return 'Gamma';
+            }
+            
+            // Return original text with proper capitalization
+            return text.trim();
+        }
+
         // Function to parse Google Sheets data into survey format
         function parseSheetData(sheetData) {
             if (!sheetData || !sheetData.values || sheetData.values.length < 2) {
@@ -381,20 +403,37 @@
                                 if (selection.length > 60 || (selection.toLowerCase().includes('ai tools') && selection.length > 30)) {
                                     otherResponses.push(selection);
                                 } else {
-                                    responses[selection] = (responses[selection] || 0) + 1;
+                                    // Normalize the response for consistent counting
+                                    const normalizedSelection = normalizeResponse(selection);
+                                    responses[normalizedSelection] = (responses[normalizedSelection] || 0) + 1;
                                 }
                             });
                         }
                     });
                     
                     // Convert to array and calculate percentages based on total respondents
-                    const responseArray = Object.entries(responses)
+                    let responseArray = Object.entries(responses)
                         .map(([text, count]) => ({
                             text,
                             count,
                             percentage: totalResponseCount > 0 ? Math.round((count / totalResponseCount) * 100) : 0
-                        }))
-                        .sort((a, b) => b.count - a.count);
+                        }));
+                    
+                    // Sort based on question type
+                    if (header.toLowerCase().includes('confident') || header.toLowerCase().includes('confidence')) {
+                        // Sort confidence scale 1-5 in order
+                        responseArray.sort((a, b) => {
+                            const aNum = parseInt(a.text);
+                            const bNum = parseInt(b.text);
+                            if (!isNaN(aNum) && !isNaN(bNum)) {
+                                return aNum - bNum;
+                            }
+                            return a.text.localeCompare(b.text);
+                        });
+                    } else {
+                        // Sort by count (highest first) for other questions
+                        responseArray.sort((a, b) => b.count - a.count);
+                    }
                     
                     if (responseArray.length > 0) {
                         // Determine question type
@@ -412,9 +451,9 @@
                             total_responses: totalResponseCount
                         };
                         
-                        // Add other responses if any
+                        // Add other responses if any (show all verbatim, comma-separated)
                         if (otherResponses.length > 0) {
-                            questionData.other_responses = otherResponses.join('; ');
+                            questionData.other_responses = otherResponses.join(', ');
                         }
                         
                         questions.push(questionData);
