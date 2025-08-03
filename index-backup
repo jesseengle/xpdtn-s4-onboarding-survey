@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XPDTN Season 4 Survey Results - Live Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            background: #1a1a1a;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            font-size: 1.1em;
+        }
+        
+        .error {
+            background: #3d1a1a;
+            color: #ff6b6b;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 1px solid #5a2a2a;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0;
+            background: #1a1a1a;
+        }
+        
+        .content {
+            padding: 5px 15px 15px 15px;
+            background: #1a1a1a;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .survey-question {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 18px;
+            border: 1px solid #3a3a3a;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        .response-count {
+            color: #9ca3af;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .responses-container {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 0 0 4px 0;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .response-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 18px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            position: relative;
+            background: #1a1a1a;
+            animation: fadeInBar 0.8s ease-out;
+        }
+        
+        @keyframes fadeInBar {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .response-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .response-content {
+            flex: 1;
+            margin-right: 15px;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .response-text {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 0;
+            font-size: 1.1em;
+            line-height: 1.3;
+        }
+        
+        .response-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            border-radius: 6px;
+        }
+        
+        .response-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #625166, #4a3d52);
+            transition: width 1.2s ease-in-out;
+            opacity: 0.8;
+            border-radius: 6px;
+            width: 0%;
+        }
+        
+        .response-stats {
+            text-align: right;
+            flex-shrink: 0;
+            min-width: 75px;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .response-percentage {
+            color: #625166;
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+        
+        .response-number {
+            color: #9ca3af;
+            font-size: 0.85em;
+            margin-top: 1px;
+        }
+        
+        .other-responses {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #3a3a3a;
+            margin-top: 12px;
+        }
+        
+        .other-title {
+            color: #625166;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 1em;
+        }
+        
+        .other-text {
+            color: #d1d5db;
+            line-height: 1.5;
+            font-size: 0.9em;
+        }
+        
+        .update-time {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.75em;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            padding: 8px;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            .content {
+                padding: 3px 12px 12px 12px;
+            }
+            
+            .section-title {
+                font-size: 1.2em;
+            }
+            
+            .response-text {
+                font-size: 1em;
+            }
+            
+            .response-percentage {
+                font-size: 1.1em;
+            }
+            
+            .response-item {
+                padding: 14px 16px;
+            }
+            
+            .response-content {
+                margin-right: 12px;
+            }
+            
+            .response-stats {
+                min-width: 65px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="dashboard-content">
+        <div class="loading">
+            <div>Loading survey data...</div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - Update these with your Google Sheets details
+        const CONFIG = {
+            SHEET_ID: '1V3VpMGqEFC_qEa03om5bgSHQ8yQ0O-VIHAIi_DG0FHw',
+            API_KEY: 'AIzaSyArz5-KtMYQTEt9pxfdRXN3nQ1w39DhvEo',
+            SHEET_NAME: 'Sheet1'
+        };
+
+        let surveyData = [];
+
+        // Complete sample data with all questions from your original survey
+        const SAMPLE_DATA = [
+            {
+                question: "How are you using AI in your work today?",
+                type: "multiple_choice",
+                responses: [
+                    { text: "Writing emails, captions, or campaign copy", count: 11, percentage: 85 },
+                    { text: "Drafting or reviewing creative briefs", count: 10, percentage: 77 },
+                    { text: "Analyzing campaign results", count: 6, percentage: 46 },
+                    { text: "Discovering or researching creators", count: 5, percentage: 38 },
+                    { text: "Generating images or video", count: 2, percentage: 15 },
+                    { text: "I'm not using AI at work yet", count: 1, percentage: 8 }
+                ],
+                total_responses: 13,
+                other_responses: "AI tools that speed up creative workflow like rotoscoping, Photoshop generative AI, Scripting, Creative Ideation"
+            },
+            {
+                question: "What's your go-to AI tool?",
+                type: "single_choice",
+                responses: [
+                    { text: "ChatGPT", count: 8, percentage: 62 },
+                    { text: "Claude", count: 3, percentage: 23 },
+                    { text: "Gemini", count: 3, percentage: 23 },
+                    { text: "Other", count: 2, percentage: 15 }
+                ],
+                total_responses: 13,
+                other_responses: "Claude AI, Poppy AI, ElevenLabs, Gamma for presentations"
+            }
+        ];
+
+        // Function to normalize response text (combine similar responses)
+        function normalizeResponse(text) {
+            const normalized = text.toLowerCase().trim();
+            
+            // Normalize common AI tools
+            if (normalized.includes('chatgpt') || normalized.includes('chat gpt') || normalized === 'gpt') {
+                return 'ChatGPT';
+            }
+            if (normalized.includes('claude')) {
+                return 'Claude';
+            }
+            if (normalized.includes('gemini')) {
+                return 'Gemini';
+            }
+            if (normalized.includes('gamma')) {
+                return 'Gamma';
+            }
+            
+            // Return original text with proper capitalization
+            return text.trim();
+        }
+
+        // Function to parse questions with custom logic per question
+        function parseQuestionData(header, rows, index, totalResponseCount) {
+            const responses = {};
+            let otherResponses = [];
+            
+            // Define pre-defined options based on your original format - EXACT list only
+            const predefinedAIUsage = [
+                "Discovering or researching creators",
+                "Drafting or reviewing creative briefs",
+                "Writing emails, captions, or campaign copy",
+                "Analyzing campaign results",
+                "Generating images or video",
+                "I'm not using AI at work yet"
+            ];
+
+            const predefinedAICuriosity = [
+                "AI for creator discovery",
+                "AI for campaign planning & briefing",
+                "AI for reviewing creator content",
+                "AI-generated content (video, images, voice)",
+                "AI assistants & internal tooling",
+                "Ethical implications / disclosure guidelines",
+                "AI and brand safety",
+                "How creators themselves are using AI",
+                "AI and the future of creator platforms"
+            ];
+
+            const predefinedTopPriority = [
+                "Learning from guest speakers",
+                "Swapping tactics/tools with peers",
+                "Discovering new AI use cases",
+                "Connecting 1:1 with others in similar roles",
+                "Having a regular space to reflect and stay sharp"
+            ];
+
+            const predefinedCreatorMarketing = [
+                "Creator Discovery & Vetting",
+                "Brief Generation & Campaign Planning",
+                "Outreach & Communication",
+                "Content Review & Brand Safety",
+                "Payment, Contracting & Legal Automation",
+                "Performance Analysis & Reporting",
+                "Competitor Monitoring & Trend Tracking",
+                "Creative Co-Pilots for UGC",
+                "Marketplace Optimization (e.g. TikTok Shop, Amazon Influencer)",
+                "Internal Knowledge Systems & Institutional Memory"
+            ];
+
+            rows.forEach(row => {
+                if (row[index] && row[index].trim()) {
+                    const answer = row[index].trim();
+                    
+                    // Special handling for "Which of the following best describes how you're using AI" question
+                    if (header.toLowerCase().includes('which of the following best describes') || 
+                        header.toLowerCase().includes('select all that apply')) {
+                        
+                        // Check each predefined option to see if it's contained in the response
+                        predefinedAIUsage.forEach(option => {
+                            if (answer.toLowerCase().includes(option.toLowerCase())) {
+                                responses[option] = (responses[option] || 0) + 1;
+                            }
+                        });
+                        
+                        // Find any text that doesn't match predefined options for "other responses"
+                        let remainingText = answer;
+                        predefinedAIUsage.forEach(option => {
+                            remainingText = remainingText.replace(new RegExp(option, 'gi'), '');
+                        });
+                        
+                        // Clean up remaining text and add to other responses if meaningful
+                        const cleanedRemaining = remainingText.split(',').map(s => s.trim()).filter(s => s && s.length > 2);
+                        cleanedRemaining.forEach(item => {
+                            if (item && !predefinedAIUsage.some(opt => opt.toLowerCase().includes(item.toLowerCase()))) {
+                                otherResponses.push(item);
+                            }
+                        });
+                        
+                        return; // Skip normal processing for this question
+                    }
+                    
+                    // Normal processing for other questions - split on commas
+                    const selections = answer.split(',').map(a => a.trim()).filter(a => a.length > 0);
+                    
+                    selections.forEach(selection => {
+                        // Handle "Which areas of AI are you most curious" question
+                        if (header.toLowerCase().includes('which areas of ai are you most curious') ||
+                            header.toLowerCase().includes('curious to learn more about') ||
+                            header.toLowerCase().includes('curious about')) {
+                            
+                            const matchedOption = predefinedAICuriosity.find(option => 
+                                option.toLowerCase() === selection.toLowerCase()
+                            );
+                            
+                            if (matchedOption) {
+                                responses[matchedOption] = (responses[matchedOption] || 0) + 1;
+                            } else {
+                                otherResponses.push(selection);
+                            }
+                        }
+                        // Handle "What's your top priority" question
+                        else if (header.toLowerCase().includes('top priority for this season')) {
+                            
+                            const matchedOption = predefinedTopPriority.find(option => 
+                                option.toLowerCase() === selection.toLowerCase()
+                            );
+                            
+                            if (matchedOption) {
+                                responses[matchedOption] = (responses[matchedOption] || 0) + 1;
+                            } else {
+                                otherResponses.push(selection);
+                            }
+                        }
+                        // Handle "Which areas of creator marketing" question
+                        else if (header.toLowerCase().includes('which areas of creator marketing') ||
+                                 header.toLowerCase().includes('testing ai tools for')) {
+                            
+                            const matchedOption = predefinedCreatorMarketing.find(option => 
+                                option.toLowerCase() === selection.toLowerCase()
+                            );
+                            
+                            if (matchedOption) {
+                                responses[matchedOption] = (responses[matchedOption] || 0) + 1;
+                            } else {
+                                otherResponses.push(selection);
+                            }
+                        }
+                        // Special handling for "go-to AI tool" question 
+                        else if (header.toLowerCase().includes('go-to ai tool')) {
+                            const normalizedSelection = normalizeResponse(selection);
+                            responses[normalizedSelection] = (responses[normalizedSelection] || 0) + 1;
+                        }
+                        // All other questions - use selection as-is
+                        else {
+                            responses[selection] = (responses[selection] || 0) + 1;
+                        }
+                    });
+                }
+            });
+
+            // Convert to array and calculate percentages
+            let responseArray = Object.entries(responses)
+                .map(([text, count]) => ({
+                    text,
+                    count,
+                    percentage: totalResponseCount > 0 ? Math.round((count / totalResponseCount) * 100) : 0
+                }));
+
+            // Special filtering for go-to AI tool (only show >20% or group as Other)
+            if (header.toLowerCase().includes('go-to ai tool')) {
+                const popularTools = responseArray.filter(r => r.percentage >= 20);
+                const unpopularTools = responseArray.filter(r => r.percentage < 20);
+                
+                responseArray = popularTools;
+                
+                if (unpopularTools.length > 0) {
+                    const otherCount = unpopularTools.reduce((sum, tool) => sum + tool.count, 0);
+                    const otherPercentage = Math.round((otherCount / totalResponseCount) * 100);
+                    responseArray.push({
+                        text: "Other",
+                        count: otherCount,
+                        percentage: otherPercentage
+                    });
+                    
+                    // Add unpopular tools to other responses
+                    otherResponses.push(...unpopularTools.map(tool => tool.text));
+                }
+            }
+
+            // Sort based on question type
+            if (header.toLowerCase().includes('confident') || header.toLowerCase().includes('confidence')) {
+                // Sort confidence scale 1-5 in order
+                responseArray.sort((a, b) => {
+                    const aNum = parseInt(a.text);
+                    const bNum = parseInt(b.text);
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return aNum - bNum;
+                    }
+                    return a.text.localeCompare(b.text);
+                });
+            } else {
+                // Sort by count (highest first) for other questions
+                responseArray.sort((a, b) => b.count - a.count);
+            }
+
+            return { responseArray, otherResponses };
+        }
+
+        // Function to parse Google Sheets data into survey format
+        function parseSheetData(sheetData) {
+            if (!sheetData || !sheetData.values || sheetData.values.length < 2) {
+                return SAMPLE_DATA;
+            }
+
+            const headers = sheetData.values[0];
+            const rows = sheetData.values.slice(1);
+            
+            // Only process specific columns: H-L (indices 7-11) and R (index 17)
+            const targetColumns = [7, 8, 9, 10, 11, 17];
+            const questions = [];
+            
+            targetColumns.forEach(index => {
+                if (index < headers.length && headers[index] && headers[index].trim()) {
+                    const header = headers[index];
+                    let totalResponseCount = 0;
+                    
+                    // Count total respondents for this question
+                    rows.forEach(row => {
+                        if (row[index] && row[index].trim()) {
+                            totalResponseCount++;
+                        }
+                    });
+
+                    const { responseArray, otherResponses } = parseQuestionData(header, rows, index, totalResponseCount);
+                    
+                    if (responseArray.length > 0) {
+                        // Determine question type
+                        let questionType = "single_choice";
+                        if (header.toLowerCase().includes('select all') || header.toLowerCase().includes('pick top')) {
+                            questionType = "multiple_choice";
+                        } else if (header.toLowerCase().includes('confident') || header.includes('1-5')) {
+                            questionType = "scale";
+                        }
+                        
+                        const questionData = {
+                            question: header,
+                            type: questionType,
+                            responses: responseArray,
+                            total_responses: totalResponseCount
+                        };
+                        
+                        // Add other responses if any (show all verbatim, comma-separated)
+                        if (otherResponses.length > 0) {
+                            questionData.other_responses = otherResponses.join(', ');
+                        }
+                        
+                        questions.push(questionData);
+                    }
+                }
+            });
+            
+            return questions.length > 0 ? questions : SAMPLE_DATA;
+        }
+
+        // Function to load data from Google Sheets using public CSV method
+        async function loadFromGoogleSheets() {
+            try {
+                // First try the API method
+                const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
+                
+                try {
+                    const apiResponse = await fetch(apiUrl);
+                    if (apiResponse.ok) {
+                        const data = await apiResponse.json();
+                        return parseSheetData(data);
+                    }
+                } catch (apiError) {
+                    console.log('API method failed, trying alternative method:', apiError);
+                }
+                
+                // Fallback: Try using public CSV export (requires sheet to be public)
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/export?format=csv&gid=0`;
+                const csvResponse = await fetch(csvUrl);
+                
+                if (!csvResponse.ok) {
+                    throw new Error(`HTTP error! status: ${csvResponse.status}. Make sure your Google Sheet is public (anyone with the link can view).`);
+                }
+                
+                const csvText = await csvResponse.text();
+                return parseCSVData(csvText);
+                
+            } catch (error) {
+                console.error('Error loading from Google Sheets:', error);
+                throw error;
+            }
+        }
+
+        // Function to parse CSV data into survey format
+        function parseCSVData(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length < 2) {
+                return SAMPLE_DATA;
+            }
+
+            const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+            const rows = lines.slice(1).map(line => {
+                // Simple CSV parsing (handles quoted values)
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
+                return values;
+            });
+            
+            // Only process specific columns: H-L (indices 7-11) and R (index 17)
+            const targetColumns = [7, 8, 9, 10, 11, 17];
+            const questions = [];
+            
+            targetColumns.forEach(index => {
+                if (index < headers.length && headers[index] && headers[index].trim()) {
+                    const header = headers[index];
+                    let totalResponseCount = 0;
+                    
+                    // Count total respondents for this question
+                    rows.forEach(row => {
+                        if (row[index] && row[index].trim()) {
+                            totalResponseCount++;
+                        }
+                    });
+
+                    const { responseArray, otherResponses } = parseQuestionData(header, rows, index, totalResponseCount);
+                    
+                    if (responseArray.length > 0) {
+                        // Determine question type
+                        let questionType = "single_choice";
+                        if (header.toLowerCase().includes('select all') || header.toLowerCase().includes('pick top')) {
+                            questionType = "multiple_choice";
+                        } else if (header.toLowerCase().includes('confident') || header.includes('1-5')) {
+                            questionType = "scale";
+                        }
+                        
+                        const questionData = {
+                            question: header,
+                            type: questionType,
+                            responses: responseArray,
+                            total_responses: totalResponseCount
+                        };
+                        
+                        // Add other responses if any (show all verbatim, comma-separated)
+                        if (otherResponses.length > 0) {
+                            questionData.other_responses = otherResponses.join(', ');
+                        }
+                        
+                        questions.push(questionData);
+                    }
+                }
+            });
+            
+            return questions.length > 0 ? questions : SAMPLE_DATA;
+        }
+
+        // Function to render the dashboard
+        function renderDashboard(data) {
+            let html = `
+                <div class="container">
+                    <div class="content">
+            `;
+
+            data.forEach((question, index) => {
+                html += `
+                    <div class="section">
+                        <div class="survey-question">
+                            <h2 class="section-title">${question.question}</h2>
+                            <div class="response-count">${question.total_responses} responses</div>
+                            
+                            <div class="responses-container">
+                `;
+
+                question.responses.forEach(response => {
+                    html += `
+                        <div class="response-item">
+                            <div class="response-bar">
+                                <div class="response-bar-fill" style="width: ${response.percentage}%;"></div>
+                            </div>
+                            <div class="response-content">
+                                <div class="response-text">${response.text}</div>
+                            </div>
+                            <div class="response-stats">
+                                <div class="response-percentage">${response.percentage}%</div>
+                                <div class="response-number">${response.count} response${response.count !== 1 ? 's' : ''}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+
+                if (question.other_responses) {
+                    html += `
+                        <div class="other-responses">
+                            <div class="other-title">Other responses:</div>
+                            <div class="other-text">${question.other_responses}</div>
+                        </div>
+                    `;
+                }
+
+                html += `</div></div>`;
+            });
+
+            html += `
+                        <div class="update-time">
+                            Last updated: ${new Date().toLocaleString()}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('dashboard-content').innerHTML = html;
+
+            // Animate the bars with staggered timing
+            setTimeout(() => {
+                const bars = document.querySelectorAll('.response-bar-fill');
+                bars.forEach((bar, index) => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100 + (index * 50)); // Staggered animation
+                });
+            }, 100);
+        }
+
+        // Function to show error
+        function showError(message) {
+            document.getElementById('dashboard-content').innerHTML = `
+                <div class="error">
+                    <h3>Error Loading Data</h3>
+                    <p>${message}</p>
+                    <p><strong>To fix this:</strong></p>
+                    <ol style="color: #ff6b6b; margin: 10px 0; padding-left: 20px;">
+                        <li>Make your Google Sheet public: Share → "Anyone with the link can view"</li>
+                        <li>Or check your API key permissions</li>
+                        <li>Refresh the page to try again</li>
+                    </ol>
+                    <p>Showing sample data for now:</p>
+                </div>
+            `;
+            renderDashboard(SAMPLE_DATA);
+        }
+
+        // Main function to load survey data
+        async function loadSurveyData() {
+            try {
+                surveyData = await loadFromGoogleSheets();
+                renderDashboard(surveyData);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSurveyData();
+        });
+    </script>
+</body>
+</html>
