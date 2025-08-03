@@ -375,24 +375,47 @@
             const responses = {};
             let otherResponses = [];
             
-            // Define pre-defined options for different questions
+            // Define pre-defined options based on your Tally form screenshots
             const predefinedAIUsage = [
-                "Writing emails, captions, or campaign copy",
-                "Drafting or reviewing creative briefs", 
-                "Analyzing campaign results",
                 "Discovering or researching creators",
+                "Drafting or reviewing creative briefs",
+                "Writing emails, captions, or campaign copy",
+                "Analyzing campaign results",
                 "Generating images or video",
                 "I'm not using AI at work yet"
             ];
 
             const predefinedAICuriosity = [
                 "AI for creator discovery",
-                "AI and the future of creator platforms",
-                "AI assistants & internal tooling",
-                "AI for reviewing creator content",
                 "AI for campaign planning & briefing",
+                "AI for reviewing creator content",
+                "AI-generated content (video, images, voice)",
+                "AI assistants & internal tooling",
+                "Ethical implications / disclosure guidelines",
+                "AI and brand safety",
                 "How creators themselves are using AI",
-                "Ethical implications / disclosure guidelines"
+                "AI and the future of creator platforms"
+            ];
+
+            const predefinedTopPriority = [
+                "Learning from guest speakers",
+                "Swapping tactics/tools with peers",
+                "Discovering new AI use cases",
+                "Connecting 1:1 with others in similar roles",
+                "Having a regular space to reflect and stay sharp"
+            ];
+
+            const predefinedCreatorMarketing = [
+                "Creator Discovery & Vetting",
+                "Brief Generation & Campaign Planning",
+                "Outreach & Communication",
+                "Content Review & Brand Safety",
+                "Payment, Contracting & Legal Automation",
+                "Performance Analysis & Reporting",
+                "Competitor Monitoring & Trend Tracking",
+                "Creative Co-Pilots for UGC",
+                "Marketplace Optimization (e.g. TikTok Shop, Amazon Influencer)",
+                "Internal Knowledge Systems & Institutional Memory"
             ];
 
             rows.forEach(row => {
@@ -422,6 +445,33 @@
                                  header.toLowerCase().includes('curious about')) {
                             
                             const matchedOption = predefinedAICuriosity.find(option => 
+                                option.toLowerCase() === selection.toLowerCase()
+                            );
+                            
+                            if (matchedOption) {
+                                responses[matchedOption] = (responses[matchedOption] || 0) + 1;
+                            } else {
+                                otherResponses.push(selection);
+                            }
+                        }
+                        // Handle "What's your top priority" question
+                        else if (header.toLowerCase().includes('top priority for this season')) {
+                            
+                            const matchedOption = predefinedTopPriority.find(option => 
+                                option.toLowerCase() === selection.toLowerCase()
+                            );
+                            
+                            if (matchedOption) {
+                                responses[matchedOption] = (responses[matchedOption] || 0) + 1;
+                            } else {
+                                otherResponses.push(selection);
+                            }
+                        }
+                        // Handle "Which areas of creator marketing" question
+                        else if (header.toLowerCase().includes('which areas of creator marketing') ||
+                                 header.toLowerCase().includes('testing ai tools for')) {
+                            
+                            const matchedOption = predefinedCreatorMarketing.find(option => 
                                 option.toLowerCase() === selection.toLowerCase()
                             );
                             
