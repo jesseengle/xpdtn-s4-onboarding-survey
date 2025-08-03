@@ -333,11 +333,6 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>XPDTN Season 4</h1>
-        <div class="subtitle">Live Survey Results Dashboard</div>
-    </div>
-
     <div id="dashboard-content">
         <div class="loading">
             <div>Loading survey data...</div>
@@ -459,10 +454,6 @@
 
         // Function to parse Google Sheets data into survey format
         function parseSheetData(sheetData) {
-            // This function would parse your actual Google Sheets data
-            // The structure depends on how Tally formats the data in your sheet
-            // You'll need to customize this based on your actual data structure
-            
             if (!sheetData || !sheetData.values || sheetData.values.length < 2) {
                 return SAMPLE_DATA; // Return sample data if no real data
             }
@@ -470,12 +461,12 @@
             const headers = sheetData.values[0];
             const rows = sheetData.values.slice(1);
             
-            // Process each question column
+            // Process each question column, but skip certain columns
             const questions = [];
+            const skipColumns = ['respondent id', 'timestamp', 'submitted at', 'response id'];
             
-            // This is a simplified example - you'll need to adapt based on your data structure
             headers.forEach((header, index) => {
-                if (header && header.trim() && index > 0) { // Skip timestamp column
+                if (header && header.trim() && !skipColumns.some(skip => header.toLowerCase().includes(skip))) {
                     const responses = {};
                     let totalResponses = 0;
                     let otherResponses = [];
@@ -514,27 +505,30 @@
                         }))
                         .sort((a, b) => b.count - a.count);
                     
-                    // Determine question type
-                    let questionType = "single_choice";
-                    if (header.toLowerCase().includes('scale') || header.includes('1-5')) {
-                        questionType = "scale";
-                    } else if (responseArray.length > 5 || header.toLowerCase().includes('select all')) {
-                        questionType = "multiple_choice";
+                    // Only include questions that have actual responses
+                    if (responseArray.length > 0) {
+                        // Determine question type
+                        let questionType = "single_choice";
+                        if (header.toLowerCase().includes('scale') || header.includes('1-5')) {
+                            questionType = "scale";
+                        } else if (responseArray.length > 5 || header.toLowerCase().includes('select all')) {
+                            questionType = "multiple_choice";
+                        }
+                        
+                        const questionData = {
+                            question: header,
+                            type: questionType,
+                            responses: responseArray,
+                            total_responses: Math.max(totalResponses, rows.filter(row => row[index] && row[index].trim()).length)
+                        };
+                        
+                        // Add other responses if any
+                        if (otherResponses.length > 0) {
+                            questionData.other_responses = otherResponses.join('; ');
+                        }
+                        
+                        questions.push(questionData);
                     }
-                    
-                    const questionData = {
-                        question: header,
-                        type: questionType,
-                        responses: responseArray,
-                        total_responses: Math.max(totalResponses, rows.filter(row => row[index] && row[index].trim()).length)
-                    };
-                    
-                    // Add other responses if any
-                    if (otherResponses.length > 0) {
-                        questionData.other_responses = otherResponses.join('; ');
-                    }
-                    
-                    questions.push(questionData);
                 }
             });
             
@@ -561,26 +555,8 @@
 
         // Function to render the dashboard
         function renderDashboard(data) {
-            const totalQuestions = data.length;
-            const totalResponses = data.reduce((sum, q) => sum + q.total_responses, 0);
-            const avgResponses = totalQuestions > 0 ? Math.round(totalResponses / totalQuestions) : 0;
-
             let html = `
                 <div class="container">
-                    <div class="stats-bar">
-                        <div class="stat-item">
-                            <div class="stat-number">${totalQuestions}</div>
-                            <div class="stat-label">Questions</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">${avgResponses}</div>
-                            <div class="stat-label">Avg Responses</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">${new Date().toLocaleDateString()}</div>
-                            <div class="stat-label">Last Updated</div>
-                        </div>
-                    </div>
                     <div class="content">
             `;
 
