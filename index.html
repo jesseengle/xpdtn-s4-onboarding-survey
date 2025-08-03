@@ -425,9 +425,9 @@
                     
                     selections.forEach(selection => {
                         // Handle "Which of the following best describes how you're using AI" question
-                        if (header.toLowerCase().includes('which of the following best describes') || 
-                            header.toLowerCase().includes('how you\'re using ai') ||
-                            header.toLowerCase().includes('describes how you\'re using ai')) {
+                        if (header.toLowerCase().includes('which of the following best describes how you\'re using ai') || 
+                            header.toLowerCase().includes('which of the following best describes') ||
+                            header.toLowerCase().includes('select all that apply')) {
                             
                             const matchedOption = predefinedAIUsage.find(option => 
                                 option.toLowerCase() === selection.toLowerCase()
