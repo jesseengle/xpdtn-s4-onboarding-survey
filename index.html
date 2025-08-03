@@ -375,7 +375,7 @@
             const responses = {};
             let otherResponses = [];
             
-            // Define pre-defined options for "How are you using AI" question
+            // Define pre-defined options for different questions
             const predefinedAIUsage = [
                 "Writing emails, captions, or campaign copy",
                 "Drafting or reviewing creative briefs", 
@@ -385,15 +385,43 @@
                 "I'm not using AI at work yet"
             ];
 
+            const predefinedAICuriosity = [
+                "AI for creator discovery",
+                "AI and the future of creator platforms",
+                "AI assistants & internal tooling",
+                "AI for reviewing creator content",
+                "AI for campaign planning & briefing",
+                "How creators themselves are using AI",
+                "Ethical implications / disclosure guidelines"
+            ];
+
             rows.forEach(row => {
                 if (row[index] && row[index].trim()) {
                     const answer = row[index].trim();
                     const selections = answer.split(',').map(a => a.trim()).filter(a => a.length > 0);
                     
                     selections.forEach(selection => {
-                        // Special handling for "How are you using AI" question
-                        if (header.toLowerCase().includes('how you\'re using ai') || header.toLowerCase().includes('how are you using ai')) {
+                        // Handle "Which of the following best describes how you're using AI" question
+                        if (header.toLowerCase().includes('which of the following best describes') || 
+                            header.toLowerCase().includes('how you\'re using ai') ||
+                            header.toLowerCase().includes('describes how you\'re using ai')) {
+                            
                             const matchedOption = predefinedAIUsage.find(option => 
+                                option.toLowerCase() === selection.toLowerCase()
+                            );
+                            
+                            if (matchedOption) {
+                                responses[matchedOption] = (responses[matchedOption] || 0) + 1;
+                            } else {
+                                otherResponses.push(selection);
+                            }
+                        }
+                        // Handle "Which areas of AI are you most curious" question
+                        else if (header.toLowerCase().includes('which areas of ai are you most curious') ||
+                                 header.toLowerCase().includes('curious to learn more about') ||
+                                 header.toLowerCase().includes('curious about')) {
+                            
+                            const matchedOption = predefinedAICuriosity.find(option => 
                                 option.toLowerCase() === selection.toLowerCase()
                             );
                             
