@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XPDTN Season 4 Survey Results</title>
+    <title>XPDTN Season 4 Survey Results - Live Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -16,6 +16,43 @@
             line-height: 1.6;
             color: #ffffff;
             background: #1a1a1a;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #3a3a3a;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #625166, #8a7ca8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header .subtitle {
+            color: #9ca3af;
+            font-size: 1.1em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            font-size: 1.1em;
+        }
+        
+        .error {
+            background: #3d1a1a;
+            color: #ff6b6b;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 1px solid #5a2a2a;
         }
         
         .container {
@@ -39,6 +76,18 @@
             padding: 18px;
             border: 1px solid #3a3a3a;
             box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .section-title {
@@ -70,6 +119,18 @@
             border-radius: 6px;
             position: relative;
             background: #1a1a1a;
+            animation: fadeInBar 0.8s ease-out;
+        }
+        
+        @keyframes fadeInBar {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
         .response-item:last-child {
@@ -104,9 +165,10 @@
         .response-bar-fill {
             height: 100%;
             background: linear-gradient(90deg, #625166, #4a3d52);
-            transition: width 0.8s ease;
+            transition: width 1.2s ease-in-out;
             opacity: 0.8;
             border-radius: 6px;
+            width: 0%;
         }
         
         .response-stats {
@@ -159,10 +221,74 @@
             padding: 8px;
         }
         
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #625166, #4a3d52);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+        
+        .refresh-btn.loading {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: #2a2a2a;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #625166;
+        }
+        
+        .stat-label {
+            color: #9ca3af;
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+        
         /* Mobile optimizations */
         @media (max-width: 480px) {
             .content {
                 padding: 3px 12px 12px 12px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
             }
             
             .section-title {
@@ -188,589 +314,392 @@
             .response-stats {
                 min-width: 65px;
             }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .stat-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .stat-number {
+                font-size: 1.4em;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="content">
-            <div class="section">
-                <div class="survey-question">
-                    <h2 class="section-title">How are you using AI in your work today?</h2>
-                    <div class="response-count">13 responses</div>
-                    
-                    <div class="responses-container">
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 85%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Writing emails, captions, or campaign copy</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">85%</div>
-                                <div class="response-number">11 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 77%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Drafting or reviewing creative briefs</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">77%</div>
-                                <div class="response-number">10 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 46%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Analyzing campaign results</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">46%</div>
-                                <div class="response-number">6 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 38%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Discovering or researching creators</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">38%</div>
-                                <div class="response-number">5 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 15%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Generating images or video</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">15%</div>
-                                <div class="response-number">2 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 8%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">I'm not using AI at work yet</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">8%</div>
-                                <div class="response-number">1 response</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="other-responses">
-                        <div class="other-title">Other responses:</div>
-                        <div class="other-text">AI tools that speed up creative workflow like rotoscoping, Photoshop generative AI, Scripting, Creative Ideation</div>
-                    </div>
-                </div>
-            </div>
+    <div class="header">
+        <h1>XPDTN Season 4</h1>
+        <div class="subtitle">Live Survey Results Dashboard</div>
+    </div>
+
+    <div id="dashboard-content">
+        <div class="loading">
+            <div>Loading survey data...</div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="loadSurveyData()">
+        🔄 Refresh
+    </button>
+
+    <script>
+        // Configuration - Update these with your Google Sheets details
+        const CONFIG = {
+            // Replace with your Google Sheets ID
+            SHEET_ID: '1V3VpMGqEFC_qEa03om5bgSHQ8yQ0O-VIHAIi_DG0FHw',
+            // Replace with your API key
+            API_KEY: '147871455517-aauperfta9dk6b8nlcmcsu5q9luis5qt.apps.googleusercontent.com',
+            // Sheet name (usually 'Sheet1' or 'Form Responses 1')
+            SHEET_NAME: 'Sheet1'
+        };
+
+        let surveyData = [];
+
+        // Complete sample data with all questions from your original survey
+        const SAMPLE_DATA = [
+            {
+                question: "How are you using AI in your work today?",
+                type: "multiple_choice",
+                responses: [
+                    { text: "Writing emails, captions, or campaign copy", count: 11, percentage: 85 },
+                    { text: "Drafting or reviewing creative briefs", count: 10, percentage: 77 },
+                    { text: "Analyzing campaign results", count: 6, percentage: 46 },
+                    { text: "Discovering or researching creators", count: 5, percentage: 38 },
+                    { text: "Generating images or video", count: 2, percentage: 15 },
+                    { text: "I'm not using AI at work yet", count: 1, percentage: 8 }
+                ],
+                total_responses: 13,
+                other_responses: "AI tools that speed up creative workflow like rotoscoping, Photoshop generative AI, Scripting, Creative Ideation"
+            },
+            {
+                question: "What's your go-to AI tool?",
+                type: "single_choice",
+                responses: [
+                    { text: "ChatGPT", count: 8, percentage: 62 },
+                    { text: "Claude", count: 3, percentage: 23 },
+                    { text: "Gemini", count: 3, percentage: 23 },
+                    { text: "Other", count: 2, percentage: 15 }
+                ],
+                total_responses: 13,
+                other_responses: "Claude AI, Poppy AI, ElevenLabs, Gamma for presentations"
+            },
+            {
+                question: "AI Confidence Level - Season Start (1-5 scale)",
+                type: "scale",
+                responses: [
+                    { text: "1 - Low confidence", count: 1, percentage: 8 },
+                    { text: "2 - Some confidence", count: 4, percentage: 31 },
+                    { text: "3 - Moderate confidence", count: 4, percentage: 31 },
+                    { text: "4 - High confidence", count: 3, percentage: 23 },
+                    { text: "5 - Very high confidence", count: 1, percentage: 8 }
+                ],
+                total_responses: 13
+            },
+            {
+                question: "What's your top priority for this season?",
+                type: "single_choice",
+                responses: [
+                    { text: "Swapping tactics/tools with peers", count: 4, percentage: 31 },
+                    { text: "Learning from guest speakers", count: 3, percentage: 23 },
+                    { text: "Having a regular space to reflect and stay sharp", count: 3, percentage: 23 },
+                    { text: "Connecting 1:1 with others in similar roles", count: 2, percentage: 15 },
+                    { text: "Other priorities", count: 1, percentage: 8 }
+                ],
+                total_responses: 13
+            },
+            {
+                question: "Which areas of AI are you most curious about?",
+                type: "multiple_choice",
+                responses: [
+                    { text: "AI for creator discovery", count: 7, percentage: 54 },
+                    { text: "AI and the future of creator platforms", count: 6, percentage: 46 },
+                    { text: "AI assistants & internal tooling", count: 5, percentage: 38 },
+                    { text: "AI for reviewing creator content", count: 4, percentage: 31 },
+                    { text: "AI for campaign planning & briefing", count: 3, percentage: 23 },
+                    { text: "How creators themselves are using AI", count: 2, percentage: 15 },
+                    { text: "Ethical implications / disclosure guidelines", count: 1, percentage: 8 }
+                ],
+                total_responses: 13
+            },
+            {
+                question: "What types of guests would you like to hear from?",
+                type: "multiple_choice",
+                responses: [
+                    { text: "CMOs/Heads of growth at brands (a level above most of us)", count: 10, percentage: 77 },
+                    { text: "Creator marketing thought leaders", count: 9, percentage: 69 },
+                    { text: "Creator partnerships peers with AI success stories", count: 6, percentage: 46 },
+                    { text: "Founders of creator marketing platforms with AI success stories", count: 4, percentage: 31 },
+                    { text: "Founders of AI-based tool companies", count: 3, percentage: 23 },
+                    { text: "Forward-thinking talent managers", count: 2, percentage: 15 }
+                ],
+                total_responses: 13
+            },
+            {
+                question: "Which areas of creator marketing would you test AI tools for?",
+                type: "multiple_choice",
+                responses: [
+                    { text: "Creator Discovery & Vetting", count: 8, percentage: 62 },
+                    { text: "Performance Analysis & Reporting", count: 7, percentage: 54 },
+                    { text: "Competitor Monitoring & Trend Tracking", count: 6, percentage: 46 },
+                    { text: "Outreach & Communication", count: 5, percentage: 38 },
+                    { text: "Creative Co-Pilots for UGC", count: 4, percentage: 31 },
+                    { text: "Brief Generation & Campaign Planning", count: 4, percentage: 31 },
+                    { text: "Content Review & Brand Safety", count: 3, percentage: 23 },
+                    { text: "Contract & Legal Document Review", count: 2, percentage: 15 }
+                ],
+                total_responses: 13
+            }
+        ];
+
+        // Function to parse Google Sheets data into survey format
+        function parseSheetData(sheetData) {
+            // This function would parse your actual Google Sheets data
+            // The structure depends on how Tally formats the data in your sheet
+            // You'll need to customize this based on your actual data structure
             
-            <div class="section">
-                <div class="survey-question">
-                    <h2 class="section-title">What's your go-to AI tool?</h2>
-                    <div class="response-count">13 responses</div>
-                    
-                    <div class="responses-container">
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 62%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">ChatGPT</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">62%</div>
-                                <div class="response-number">8 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 23%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Claude</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">23%</div>
-                                <div class="response-number">3 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 23%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Gemini</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">23%</div>
-                                <div class="response-number">3 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 15%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Other</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">15%</div>
-                                <div class="response-number">2 responses</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="other-responses">
-                        <div class="other-title">Other tools mentioned:</div>
-                        <div class="other-text">Claude AI, Poppy AI, ElevenLabs, Gamma for presentations</div>
-                    </div>
-                </div>
-            </div>
+            if (!sheetData || !sheetData.values || sheetData.values.length < 2) {
+                return SAMPLE_DATA; // Return sample data if no real data
+            }
+
+            const headers = sheetData.values[0];
+            const rows = sheetData.values.slice(1);
             
-            <div class="section">
-                <div class="survey-question">
-                    <h2 class="section-title">AI Confidence Level - Season Start (1-5 scale)</h2>
-                    <div class="response-count">13 responses</div>
+            // Process each question column
+            const questions = [];
+            
+            // This is a simplified example - you'll need to adapt based on your data structure
+            headers.forEach((header, index) => {
+                if (header && header.trim() && index > 0) { // Skip timestamp column
+                    const responses = {};
+                    let totalResponses = 0;
+                    let otherResponses = [];
                     
-                    <div class="responses-container">
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 8%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">1 - Low confidence</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">8%</div>
-                                <div class="response-number">1 response</div>
-                            </div>
+                    rows.forEach(row => {
+                        if (row[index] && row[index].trim()) {
+                            const answer = row[index].trim();
+                            
+                            // Handle multiple choice questions (responses separated by commas or semicolons)
+                            if (answer.includes(',') || answer.includes(';')) {
+                                const multipleAnswers = answer.split(/[,;]/).map(a => a.trim());
+                                multipleAnswers.forEach(ans => {
+                                    if (ans) {
+                                        responses[ans] = (responses[ans] || 0) + 1;
+                                        totalResponses++;
+                                    }
+                                });
+                            } else {
+                                // Check if it's an "Other" response (usually longer text)
+                                if (answer.length > 50 || answer.toLowerCase().includes('other')) {
+                                    otherResponses.push(answer);
+                                } else {
+                                    responses[answer] = (responses[answer] || 0) + 1;
+                                    totalResponses++;
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Convert to array and calculate percentages
+                    const responseArray = Object.entries(responses)
+                        .map(([text, count]) => ({
+                            text,
+                            count,
+                            percentage: totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0
+                        }))
+                        .sort((a, b) => b.count - a.count);
+                    
+                    // Determine question type
+                    let questionType = "single_choice";
+                    if (header.toLowerCase().includes('scale') || header.includes('1-5')) {
+                        questionType = "scale";
+                    } else if (responseArray.length > 5 || header.toLowerCase().includes('select all')) {
+                        questionType = "multiple_choice";
+                    }
+                    
+                    const questionData = {
+                        question: header,
+                        type: questionType,
+                        responses: responseArray,
+                        total_responses: Math.max(totalResponses, rows.filter(row => row[index] && row[index].trim()).length)
+                    };
+                    
+                    // Add other responses if any
+                    if (otherResponses.length > 0) {
+                        questionData.other_responses = otherResponses.join('; ');
+                    }
+                    
+                    questions.push(questionData);
+                }
+            });
+            
+            return questions.length > 0 ? questions : SAMPLE_DATA;
+        }
+
+        // Function to load data from Google Sheets
+        async function loadFromGoogleSheets() {
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return parseSheetData(data);
+            } catch (error) {
+                console.error('Error loading from Google Sheets:', error);
+                throw error;
+            }
+        }
+
+        // Function to render the dashboard
+        function renderDashboard(data) {
+            const totalQuestions = data.length;
+            const totalResponses = data.reduce((sum, q) => sum + q.total_responses, 0);
+            const avgResponses = totalQuestions > 0 ? Math.round(totalResponses / totalQuestions) : 0;
+
+            let html = `
+                <div class="container">
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <div class="stat-number">${totalQuestions}</div>
+                            <div class="stat-label">Questions</div>
                         </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 31%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">2 - Some confidence</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">31%</div>
-                                <div class="response-number">4 responses</div>
-                            </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${avgResponses}</div>
+                            <div class="stat-label">Avg Responses</div>
                         </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 31%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">3 - Moderate confidence</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">31%</div>
-                                <div class="response-number">4 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 23%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">4 - High confidence</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">23%</div>
-                                <div class="response-number">3 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 8%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">5 - Very high confidence</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">8%</div>
-                                <div class="response-number">1 response</div>
-                            </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${new Date().toLocaleDateString()}</div>
+                            <div class="stat-label">Last Updated</div>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <div class="survey-question">
-                    <h2 class="section-title">What's your top priority for this season?</h2>
-                    <div class="response-count">13 responses</div>
-                    
-                    <div class="responses-container">
+                    <div class="content">
+            `;
+
+            data.forEach((question, index) => {
+                html += `
+                    <div class="section">
+                        <div class="survey-question">
+                            <h2 class="section-title">${question.question}</h2>
+                            <div class="response-count">${question.total_responses} responses</div>
+                            
+                            <div class="responses-container">
+                `;
+
+                question.responses.forEach(response => {
+                    html += `
                         <div class="response-item">
                             <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 31%;"></div>
+                                <div class="response-bar-fill" style="width: ${response.percentage}%;"></div>
                             </div>
                             <div class="response-content">
-                                <div class="response-text">Swapping tactics/tools with peers</div>
+                                <div class="response-text">${response.text}</div>
                             </div>
                             <div class="response-stats">
-                                <div class="response-percentage">31%</div>
-                                <div class="response-number">4 responses</div>
+                                <div class="response-percentage">${response.percentage}%</div>
+                                <div class="response-number">${response.count} response${response.count !== 1 ? 's' : ''}</div>
                             </div>
                         </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 23%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Learning from guest speakers</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">23%</div>
-                                <div class="response-number">3 responses</div>
-                            </div>
+                    `;
+                });
+
+                html += `</div>`;
+
+                if (question.other_responses) {
+                    html += `
+                        <div class="other-responses">
+                            <div class="other-title">Other responses:</div>
+                            <div class="other-text">${question.other_responses}</div>
                         </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 23%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Having a regular space to reflect and stay sharp</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">23%</div>
-                                <div class="response-number">3 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 15%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Connecting 1:1 with others in similar roles</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">15%</div>
-                                <div class="response-number">2 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 8%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Other priorities</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">8%</div>
-                                <div class="response-number">1 response</div>
-                            </div>
+                    `;
+                }
+
+                html += `</div></div>`;
+            });
+
+            html += `
+                        <div class="update-time">
+                            Last updated: ${new Date().toLocaleString()}
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="section">
-                <div class="survey-question">
-                    <h2 class="section-title">Which areas of AI are you most curious about?</h2>
-                    <div class="response-count">13 responses</div>
-                    
-                    <div class="responses-container">
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 54%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">AI for creator discovery</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">54%</div>
-                                <div class="response-number">7 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 46%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">AI and the future of creator platforms</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">46%</div>
-                                <div class="response-number">6 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 38%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">AI assistants & internal tooling</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">38%</div>
-                                <div class="response-number">5 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 31%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">AI for reviewing creator content</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">31%</div>
-                                <div class="response-number">4 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 23%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">AI for campaign planning & briefing</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">23%</div>
-                                <div class="response-number">3 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 15%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">How creators themselves are using AI</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">15%</div>
-                                <div class="response-number">2 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 8%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Ethical implications / disclosure guidelines</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">8%</div>
-                                <div class="response-number">1 response</div>
-                            </div>
-                        </div>
-                    </div>
+            `;
+
+            document.getElementById('dashboard-content').innerHTML = html;
+
+            // Animate the bars with staggered timing
+            setTimeout(() => {
+                const bars = document.querySelectorAll('.response-bar-fill');
+                bars.forEach((bar, index) => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100 + (index * 50)); // Staggered animation
+                });
+            }, 100);
+        }
+
+        // Function to show error
+        function showError(message) {
+            document.getElementById('dashboard-content').innerHTML = `
+                <div class="error">
+                    <h3>Error Loading Data</h3>
+                    <p>${message}</p>
+                    <p>Showing sample data instead. Please check your Google Sheets configuration.</p>
                 </div>
-            </div>
-            
-            <div class="section">
-                <div class="survey-question">
-                    <h2 class="section-title">What types of guests would you like to hear from?</h2>
-                    <div class="response-count">13 responses</div>
-                    
-                    <div class="responses-container">
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 77%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">CMOs/Heads of growth at brands (a level above most of us)</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">77%</div>
-                                <div class="response-number">10 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 69%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Creator marketing thought leaders</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">69%</div>
-                                <div class="response-number">9 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 46%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Creator partnerships peers with AI success stories</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">46%</div>
-                                <div class="response-number">6 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 31%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Founders of creator marketing platforms with AI success stories</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">31%</div>
-                                <div class="response-number">4 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 23%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Founders of AI-based tool companies</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">23%</div>
-                                <div class="response-number">3 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 15%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Forward-thinking talent managers</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">15%</div>
-                                <div class="response-number">2 responses</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <div class="survey-question">
-                    <h2 class="section-title">Which areas of creator marketing would you test AI tools for?</h2>
-                    <div class="response-count">13 responses</div>
-                    
-                    <div class="responses-container">
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 62%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Creator Discovery & Vetting</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">62%</div>
-                                <div class="response-number">8 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 54%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Performance Analysis & Reporting</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">54%</div>
-                                <div class="response-number">7 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 46%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Competitor Monitoring & Trend Tracking</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">46%</div>
-                                <div class="response-number">6 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 38%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Outreach & Communication</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">38%</div>
-                                <div class="response-number">5 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 31%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Creative Co-Pilots for UGC</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">31%</div>
-                                <div class="response-number">4 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 31%;"></div>
-                            </div>
-                            <div class="response-content">
-                                <div class="response-text">Brief Generation & Campaign Planning</div>
-                            </div>
-                            <div class="response-stats">
-                                <div class="response-percentage">31%</div>
-                                <div class="response-number">4 responses</div>
-                            </div>
-                        </div>
-                        
-                        <div class="response-item">
-                            <div class="response-bar">
-                                <div class="response-bar-fill" style="width: 23%;"></div>
+            `;
+            renderDashboard(SAMPLE_DATA);
+        }
+
+        // Main function to load survey data
+        async function loadSurveyData() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            refreshBtn.classList.add('loading');
+
+            try {
+                // Try to load from Google Sheets first
+                if (CONFIG.SHEET_ID !== 'YOUR_GOOGLE_SHEET_ID_HERE' && CONFIG.API_KEY !== 'YOUR_GOOGLE_API_KEY_HERE') {
+                    surveyData = await loadFromGoogleSheets();
+                } else {
+                    // Use sample data if not configured
+                    console.log('Using sample data - please configure Google Sheets integration');
+                    surveyData = SAMPLE_DATA;
+                }
+
+                renderDashboard(surveyData);
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                refreshBtn.classList.remove('loading');
+            }
+        }
+
+        // Function to start auto-refresh
+        function startAutoRefresh() {
+            // Auto-refresh removed - data loads fresh on each page visit
+            console.log('Dashboard ready - refresh page to load latest data');
+        }
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSurveyData();
+        });
+
+        // Handle visibility change - simplified without auto-refresh
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                console.log('Page visible - data will be fresh on next manual refresh');
+            }
+        });
+    </script>
+</body>
+</html>
