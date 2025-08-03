@@ -339,17 +339,13 @@
         </div>
     </div>
 
-    <button class="refresh-btn" onclick="loadSurveyData()">
-        🔄 Refresh
-    </button>
-
     <script>
         // Configuration - Update these with your Google Sheets details
         const CONFIG = {
             // Replace with your Google Sheets ID
-            SHEET_ID: '1V3VpMGqEFC_qEa03om5bgSHQ8yQ0O-VIHAIi_DG0FHw',
+            SHEET_ID: 'YOUR_GOOGLE_SHEET_ID_HERE',
             // Replace with your API key
-            API_KEY: 'AIzaSyArz5-KtMYQTEt9pxfdRXN3nQ1w39DhvEo',
+            API_KEY: 'YOUR_GOOGLE_API_KEY_HERE',
             // Sheet name (usually 'Sheet1' or 'Form Responses 1')
             SHEET_NAME: 'Sheet1'
         };
@@ -535,22 +531,140 @@
             return questions.length > 0 ? questions : SAMPLE_DATA;
         }
 
-        // Function to load data from Google Sheets
+        // Function to load data from Google Sheets using public CSV method
         async function loadFromGoogleSheets() {
             try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
-                const response = await fetch(url);
+                // First try the API method
+                const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                try {
+                    const apiResponse = await fetch(apiUrl);
+                    if (apiResponse.ok) {
+                        const data = await apiResponse.json();
+                        return parseSheetData(data);
+                    }
+                } catch (apiError) {
+                    console.log('API method failed, trying alternative method:', apiError);
                 }
                 
-                const data = await response.json();
-                return parseSheetData(data);
+                // Fallback: Try using public CSV export (requires sheet to be public)
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/export?format=csv&gid=0`;
+                const csvResponse = await fetch(csvUrl);
+                
+                if (!csvResponse.ok) {
+                    throw new Error(`HTTP error! status: ${csvResponse.status}. Make sure your Google Sheet is public (anyone with the link can view).`);
+                }
+                
+                const csvText = await csvResponse.text();
+                return parseCSVData(csvText);
+                
             } catch (error) {
                 console.error('Error loading from Google Sheets:', error);
                 throw error;
             }
+        }
+
+        // Function to parse CSV data into survey format
+        function parseCSVData(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length < 2) {
+                return SAMPLE_DATA;
+            }
+
+            const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+            const rows = lines.slice(1).map(line => {
+                // Simple CSV parsing (handles quoted values)
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
+                return values;
+            });
+            
+            // Process each question column, but skip certain columns
+            const questions = [];
+            const skipColumns = ['respondent id', 'timestamp', 'submitted at', 'response id'];
+            
+            headers.forEach((header, index) => {
+                if (header && header.trim() && !skipColumns.some(skip => header.toLowerCase().includes(skip))) {
+                    const responses = {};
+                    let totalResponses = 0;
+                    let otherResponses = [];
+                    
+                    rows.forEach(row => {
+                        if (row[index] && row[index].trim()) {
+                            const answer = row[index].replace(/"/g, '').trim();
+                            
+                            // Handle multiple choice questions (responses separated by commas or semicolons)
+                            if (answer.includes(',') || answer.includes(';')) {
+                                const multipleAnswers = answer.split(/[,;]/).map(a => a.trim());
+                                multipleAnswers.forEach(ans => {
+                                    if (ans) {
+                                        responses[ans] = (responses[ans] || 0) + 1;
+                                        totalResponses++;
+                                    }
+                                });
+                            } else {
+                                // Check if it's an "Other" response (usually longer text)
+                                if (answer.length > 50 || answer.toLowerCase().includes('other')) {
+                                    otherResponses.push(answer);
+                                } else {
+                                    responses[answer] = (responses[answer] || 0) + 1;
+                                    totalResponses++;
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Convert to array and calculate percentages
+                    const responseArray = Object.entries(responses)
+                        .map(([text, count]) => ({
+                            text,
+                            count,
+                            percentage: totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0
+                        }))
+                        .sort((a, b) => b.count - a.count);
+                    
+                    // Only include questions that have actual responses
+                    if (responseArray.length > 0) {
+                        // Determine question type
+                        let questionType = "single_choice";
+                        if (header.toLowerCase().includes('scale') || header.includes('1-5')) {
+                            questionType = "scale";
+                        } else if (responseArray.length > 5 || header.toLowerCase().includes('select all')) {
+                            questionType = "multiple_choice";
+                        }
+                        
+                        const questionData = {
+                            question: header,
+                            type: questionType,
+                            responses: responseArray,
+                            total_responses: Math.max(totalResponses, rows.filter(row => row[index] && row[index].trim()).length)
+                        };
+                        
+                        // Add other responses if any
+                        if (otherResponses.length > 0) {
+                            questionData.other_responses = otherResponses.join('; ');
+                        }
+                        
+                        questions.push(questionData);
+                    }
+                }
+            });
+            
+            return questions.length > 0 ? questions : SAMPLE_DATA;
         }
 
         // Function to render the dashboard
@@ -630,7 +744,13 @@
                 <div class="error">
                     <h3>Error Loading Data</h3>
                     <p>${message}</p>
-                    <p>Showing sample data instead. Please check your Google Sheets configuration.</p>
+                    <p><strong>To fix this:</strong></p>
+                    <ol style="color: #ff6b6b; margin: 10px 0; padding-left: 20px;">
+                        <li>Make your Google Sheet public: Share → "Anyone with the link can view"</li>
+                        <li>Or check your API key permissions</li>
+                        <li>Refresh the page to try again</li>
+                    </ol>
+                    <p>Showing sample data for now:</p>
                 </div>
             `;
             renderDashboard(SAMPLE_DATA);
@@ -638,9 +758,6 @@
 
         // Main function to load survey data
         async function loadSurveyData() {
-            const refreshBtn = document.querySelector('.refresh-btn');
-            refreshBtn.classList.add('loading');
-
             try {
                 // Try to load from Google Sheets first
                 if (CONFIG.SHEET_ID !== 'YOUR_GOOGLE_SHEET_ID_HERE' && CONFIG.API_KEY !== 'YOUR_GOOGLE_API_KEY_HERE') {
@@ -654,8 +771,6 @@
                 renderDashboard(surveyData);
             } catch (error) {
                 showError(error.message);
-            } finally {
-                refreshBtn.classList.remove('loading');
             }
         }
 
