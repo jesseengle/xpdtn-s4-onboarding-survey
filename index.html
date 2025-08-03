@@ -242,17 +242,14 @@
     <script>
         // Configuration - Update these with your Google Sheets details
         const CONFIG = {
-            // Replace with your Google Sheets ID
             SHEET_ID: '1V3VpMGqEFC_qEa03om5bgSHQ8yQ0O-VIHAIi_DG0FHw',
-            // Replace with your API key
             API_KEY: 'AIzaSyArz5-KtMYQTEt9pxfdRXN3nQ1w39DhvEo',
-            // Sheet name (usually 'Sheet1' or 'Form Responses 1')
             SHEET_NAME: 'Sheet1'
         };
 
         let surveyData = [];
 
-        // Complete sample data that shows the EXACT format we want
+        // Complete sample data with all questions from your original survey
         const SAMPLE_DATA = [
             {
                 question: "How are you using AI in your work today?",
@@ -279,72 +276,6 @@
                 ],
                 total_responses: 13,
                 other_responses: "Claude AI, Poppy AI, ElevenLabs, Gamma for presentations"
-            },
-            {
-                question: "AI Confidence Level - Season Start (1-5 scale)",
-                type: "scale",
-                responses: [
-                    { text: "1 - Low confidence", count: 1, percentage: 8 },
-                    { text: "2 - Some confidence", count: 4, percentage: 31 },
-                    { text: "3 - Moderate confidence", count: 4, percentage: 31 },
-                    { text: "4 - High confidence", count: 3, percentage: 23 },
-                    { text: "5 - Very high confidence", count: 1, percentage: 8 }
-                ],
-                total_responses: 13
-            },
-            {
-                question: "What's your top priority for this season?",
-                type: "single_choice",
-                responses: [
-                    { text: "Swapping tactics/tools with peers", count: 4, percentage: 31 },
-                    { text: "Learning from guest speakers", count: 3, percentage: 23 },
-                    { text: "Having a regular space to reflect and stay sharp", count: 3, percentage: 23 },
-                    { text: "Connecting 1:1 with others in similar roles", count: 2, percentage: 15 },
-                    { text: "Other priorities", count: 1, percentage: 8 }
-                ],
-                total_responses: 13
-            },
-            {
-                question: "Which areas of AI are you most curious about?",
-                type: "multiple_choice",
-                responses: [
-                    { text: "AI for creator discovery", count: 7, percentage: 54 },
-                    { text: "AI and the future of creator platforms", count: 6, percentage: 46 },
-                    { text: "AI assistants & internal tooling", count: 5, percentage: 38 },
-                    { text: "AI for reviewing creator content", count: 4, percentage: 31 },
-                    { text: "AI for campaign planning & briefing", count: 3, percentage: 23 },
-                    { text: "How creators themselves are using AI", count: 2, percentage: 15 },
-                    { text: "Ethical implications / disclosure guidelines", count: 1, percentage: 8 }
-                ],
-                total_responses: 13
-            },
-            {
-                question: "What types of guests would you like to hear from?",
-                type: "multiple_choice",
-                responses: [
-                    { text: "CMOs/Heads of growth at brands (a level above most of us)", count: 10, percentage: 77 },
-                    { text: "Creator marketing thought leaders", count: 9, percentage: 69 },
-                    { text: "Creator partnerships peers with AI success stories", count: 6, percentage: 46 },
-                    { text: "Founders of creator marketing platforms with AI success stories", count: 4, percentage: 31 },
-                    { text: "Founders of AI-based tool companies", count: 3, percentage: 23 },
-                    { text: "Forward-thinking talent managers", count: 2, percentage: 15 }
-                ],
-                total_responses: 13
-            },
-            {
-                question: "Which areas of creator marketing would you test AI tools for?",
-                type: "multiple_choice",
-                responses: [
-                    { text: "Creator Discovery & Vetting", count: 8, percentage: 62 },
-                    { text: "Performance Analysis & Reporting", count: 7, percentage: 54 },
-                    { text: "Competitor Monitoring & Trend Tracking", count: 6, percentage: 46 },
-                    { text: "Outreach & Communication", count: 5, percentage: 38 },
-                    { text: "Creative Co-Pilots for UGC", count: 4, percentage: 31 },
-                    { text: "Brief Generation & Campaign Planning", count: 4, percentage: 31 },
-                    { text: "Content Review & Brand Safety", count: 3, percentage: 23 },
-                    { text: "Contract & Legal Document Review", count: 2, percentage: 15 }
-                ],
-                total_responses: 13
             }
         ];
 
@@ -421,35 +352,43 @@
             rows.forEach(row => {
                 if (row[index] && row[index].trim()) {
                     const answer = row[index].trim();
+                    
+                    // Special handling for "Which of the following best describes how you're using AI" question
+                    if (header.toLowerCase().includes('which of the following best describes') || 
+                        header.toLowerCase().includes('select all that apply')) {
+                        
+                        // Check each predefined option to see if it's contained in the response
+                        predefinedAIUsage.forEach(option => {
+                            if (answer.toLowerCase().includes(option.toLowerCase())) {
+                                responses[option] = (responses[option] || 0) + 1;
+                            }
+                        });
+                        
+                        // Find any text that doesn't match predefined options for "other responses"
+                        let remainingText = answer;
+                        predefinedAIUsage.forEach(option => {
+                            remainingText = remainingText.replace(new RegExp(option, 'gi'), '');
+                        });
+                        
+                        // Clean up remaining text and add to other responses if meaningful
+                        const cleanedRemaining = remainingText.split(',').map(s => s.trim()).filter(s => s && s.length > 2);
+                        cleanedRemaining.forEach(item => {
+                            if (item && !predefinedAIUsage.some(opt => opt.toLowerCase().includes(item.toLowerCase()))) {
+                                otherResponses.push(item);
+                            }
+                        });
+                        
+                        return; // Skip normal processing for this question
+                    }
+                    
+                    // Normal processing for other questions - split on commas
                     const selections = answer.split(',').map(a => a.trim()).filter(a => a.length > 0);
                     
                     selections.forEach(selection => {
-                        // DEBUG: Let's see what headers we're getting
-                        console.log('Processing header:', header);
-                        console.log('Selection:', selection);
-                        
-                        // Handle "Which of the following best describes how you're using AI" question
-                        if (header.toLowerCase().includes('which of the following best describes') || 
-                            header.toLowerCase().includes('select all that apply') ||
-                            header.toLowerCase().includes('how you\'re using ai')) {
-                            
-                            console.log('MATCHED AI Usage question!');
-                            const matchedOption = predefinedAIUsage.find(option => 
-                                option.toLowerCase() === selection.toLowerCase()
-                            );
-                            
-                            if (matchedOption) {
-                                console.log('Found predefined option:', matchedOption);
-                                responses[matchedOption] = (responses[matchedOption] || 0) + 1;
-                            } else {
-                                console.log('Adding to other responses:', selection);
-                                otherResponses.push(selection);
-                            }
-                        }
                         // Handle "Which areas of AI are you most curious" question
-                        else if (header.toLowerCase().includes('which areas of ai are you most curious') ||
-                                 header.toLowerCase().includes('curious to learn more about') ||
-                                 header.toLowerCase().includes('curious about')) {
+                        if (header.toLowerCase().includes('which areas of ai are you most curious') ||
+                            header.toLowerCase().includes('curious to learn more about') ||
+                            header.toLowerCase().includes('curious about')) {
                             
                             const matchedOption = predefinedAICuriosity.find(option => 
                                 option.toLowerCase() === selection.toLowerCase()
@@ -668,67 +607,42 @@
             });
             
             // Only process specific columns: H-L (indices 7-11) and R (index 17)
-            const targetColumns = [7, 8, 9, 10, 11, 17]; // H, I, J, K, L, R (0-indexed)
+            const targetColumns = [7, 8, 9, 10, 11, 17];
             const questions = [];
             
             targetColumns.forEach(index => {
                 if (index < headers.length && headers[index] && headers[index].trim()) {
                     const header = headers[index];
-                    const responses = {};
-                    let totalResponses = 0;
-                    let otherResponses = [];
+                    let totalResponseCount = 0;
                     
+                    // Count total respondents for this question
                     rows.forEach(row => {
                         if (row[index] && row[index].trim()) {
-                            const answer = row[index].replace(/"/g, '').trim();
-                            
-                            // For multiple choice questions, don't split on commas within the answer text
-                            // Only split if it looks like multiple separate selections (semicolon separated)
-                            if (answer.includes(';')) {
-                                const multipleAnswers = answer.split(';').map(a => a.trim());
-                                multipleAnswers.forEach(ans => {
-                                    if (ans) {
-                                        responses[ans] = (responses[ans] || 0) + 1;
-                                        totalResponses++;
-                                    }
-                                });
-                            } else {
-                                // Treat as single response - don't split on commas
-                                responses[answer] = (responses[answer] || 0) + 1;
-                                totalResponses++;
-                            }
+                            totalResponseCount++;
                         }
                     });
+
+                    const { responseArray, otherResponses } = parseQuestionData(header, rows, index, totalResponseCount);
                     
-                    // Convert to array and calculate percentages
-                    const responseArray = Object.entries(responses)
-                        .map(([text, count]) => ({
-                            text,
-                            count,
-                            percentage: totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0
-                        }))
-                        .sort((a, b) => b.count - a.count);
-                    
-                    // Only include questions that have actual responses
                     if (responseArray.length > 0) {
                         // Determine question type
                         let questionType = "single_choice";
-                        if (header.toLowerCase().includes('scale') || header.includes('1-5')) {
-                            questionType = "scale";
-                        } else if (responseArray.length > 5 || header.toLowerCase().includes('select all')) {
+                        if (header.toLowerCase().includes('select all') || header.toLowerCase().includes('pick top')) {
                             questionType = "multiple_choice";
+                        } else if (header.toLowerCase().includes('confident') || header.includes('1-5')) {
+                            questionType = "scale";
                         }
                         
                         const questionData = {
                             question: header,
                             type: questionType,
                             responses: responseArray,
-                            total_responses: Math.max(totalResponses, rows.filter(row => row[index] && row[index].trim()).length)
+                            total_responses: totalResponseCount
                         };
                         
-                        // Add other responses if any
+                        // Add other responses if any (show all verbatim, comma-separated)
                         if (otherResponses.length > 0) {
-                            questionData.other_responses = otherResponses.join('; ');
+                            questionData.other_responses = otherResponses.join(', ');
                         }
                         
                         questions.push(questionData);
@@ -831,7 +745,6 @@
         // Main function to load survey data
         async function loadSurveyData() {
             try {
-                // Now try to load live data with the correct parsing
                 surveyData = await loadFromGoogleSheets();
                 renderDashboard(surveyData);
             } catch (error) {
