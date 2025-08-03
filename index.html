@@ -38,11 +38,13 @@
             max-width: 100%;
             margin: 0;
             background: #1a1a1a;
+            padding: 0 16px;
         }
         
         .content {
-            padding: 5px 15px 15px 15px;
+            padding: 5px 0 15px 0;
             background: #1a1a1a;
+            max-width: 100%;
         }
         
         .section {
@@ -51,7 +53,7 @@
         
         .survey-question {
             background: #2a2a2a;
-            border-radius: 10px;
+            border-radius: 16px;
             padding: 18px;
             border: 1px solid #3a3a3a;
             box-shadow: 0 3px 8px rgba(0,0,0,0.3);
@@ -85,7 +87,7 @@
         
         .responses-container {
             background: #1a1a1a;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 0 0 4px 0;
             border: 1px solid #3a3a3a;
         }
@@ -172,7 +174,7 @@
         
         .other-responses {
             background: #1a1a1a;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 15px;
             border: 1px solid #3a3a3a;
             margin-top: 12px;
@@ -202,8 +204,12 @@
         
         /* Mobile optimizations */
         @media (max-width: 480px) {
+            .container {
+                padding: 0 12px;
+            }
+            
             .content {
-                padding: 3px 12px 12px 12px;
+                padding: 3px 0 12px 0;
             }
             
             .section-title {
