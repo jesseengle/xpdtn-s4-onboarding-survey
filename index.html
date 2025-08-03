@@ -763,7 +763,7 @@
         async function loadSurveyData() {
             try {
                 // Try to load from Google Sheets first
-                if (CONFIG.SHEET_ID !== '1V3VpMGqEFC_qEa03om5bgSHQ8yQ0O-VIHAIi_DG0FHw' && CONFIG.API_KEY !== 'AIzaSyArz5-KtMYQTEt9pxfdRXN3nQ1w39DhvEo') {
+                if (CONFIG.SHEET_ID !== 'YOUR_GOOGLE_SHEET_ID_HERE' && CONFIG.API_KEY !== 'AIzaSyArz5-KtMYQTEt9pxfdRXN3nQ1w39DhvEo') {
                     surveyData = await loadFromGoogleSheets();
                 } else {
                     // Use sample data if not configured
