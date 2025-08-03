@@ -370,6 +370,100 @@
             return text.trim();
         }
 
+        // Function to parse questions with custom logic per question
+        function parseQuestionData(header, rows, index, totalResponseCount) {
+            const responses = {};
+            let otherResponses = [];
+            
+            // Define pre-defined options for "How are you using AI" question
+            const predefinedAIUsage = [
+                "Writing emails, captions, or campaign copy",
+                "Drafting or reviewing creative briefs", 
+                "Analyzing campaign results",
+                "Discovering or researching creators",
+                "Generating images or video",
+                "I'm not using AI at work yet"
+            ];
+
+            rows.forEach(row => {
+                if (row[index] && row[index].trim()) {
+                    const answer = row[index].trim();
+                    const selections = answer.split(',').map(a => a.trim()).filter(a => a.length > 0);
+                    
+                    selections.forEach(selection => {
+                        // Special handling for "How are you using AI" question
+                        if (header.toLowerCase().includes('how you\'re using ai') || header.toLowerCase().includes('how are you using ai')) {
+                            const matchedOption = predefinedAIUsage.find(option => 
+                                option.toLowerCase() === selection.toLowerCase()
+                            );
+                            
+                            if (matchedOption) {
+                                responses[matchedOption] = (responses[matchedOption] || 0) + 1;
+                            } else {
+                                otherResponses.push(selection);
+                            }
+                        }
+                        // Special handling for "go-to AI tool" question 
+                        else if (header.toLowerCase().includes('go-to ai tool')) {
+                            const normalizedSelection = normalizeResponse(selection);
+                            responses[normalizedSelection] = (responses[normalizedSelection] || 0) + 1;
+                        }
+                        // All other questions - use selection as-is
+                        else {
+                            responses[selection] = (responses[selection] || 0) + 1;
+                        }
+                    });
+                }
+            });
+
+            // Convert to array and calculate percentages
+            let responseArray = Object.entries(responses)
+                .map(([text, count]) => ({
+                    text,
+                    count,
+                    percentage: totalResponseCount > 0 ? Math.round((count / totalResponseCount) * 100) : 0
+                }));
+
+            // Special filtering for go-to AI tool (only show >20% or group as Other)
+            if (header.toLowerCase().includes('go-to ai tool')) {
+                const popularTools = responseArray.filter(r => r.percentage >= 20);
+                const unpopularTools = responseArray.filter(r => r.percentage < 20);
+                
+                responseArray = popularTools;
+                
+                if (unpopularTools.length > 0) {
+                    const otherCount = unpopularTools.reduce((sum, tool) => sum + tool.count, 0);
+                    const otherPercentage = Math.round((otherCount / totalResponseCount) * 100);
+                    responseArray.push({
+                        text: "Other",
+                        count: otherCount,
+                        percentage: otherPercentage
+                    });
+                    
+                    // Add unpopular tools to other responses
+                    otherResponses.push(...unpopularTools.map(tool => tool.text));
+                }
+            }
+
+            // Sort based on question type
+            if (header.toLowerCase().includes('confident') || header.toLowerCase().includes('confidence')) {
+                // Sort confidence scale 1-5 in order
+                responseArray.sort((a, b) => {
+                    const aNum = parseInt(a.text);
+                    const bNum = parseInt(b.text);
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return aNum - bNum;
+                    }
+                    return a.text.localeCompare(b.text);
+                });
+            } else {
+                // Sort by count (highest first) for other questions
+                responseArray.sort((a, b) => b.count - a.count);
+            }
+
+            return { responseArray, otherResponses };
+        }
+
         // Function to parse Google Sheets data into survey format
         function parseSheetData(sheetData) {
             if (!sheetData || !sheetData.values || sheetData.values.length < 2) {
@@ -386,54 +480,16 @@
             targetColumns.forEach(index => {
                 if (index < headers.length && headers[index] && headers[index].trim()) {
                     const header = headers[index];
-                    const responses = {};
                     let totalResponseCount = 0;
-                    let otherResponses = [];
                     
+                    // Count total respondents for this question
                     rows.forEach(row => {
                         if (row[index] && row[index].trim()) {
-                            const answer = row[index].trim();
-                            totalResponseCount++; // Count total respondents for this question
-                            
-                            // Split on commas for multiple selections, but be smart about it
-                            const selections = answer.split(',').map(a => a.trim()).filter(a => a.length > 0);
-                            
-                            selections.forEach(selection => {
-                                // Check if it's a long custom response (probably "other")
-                                if (selection.length > 60 || (selection.toLowerCase().includes('ai tools') && selection.length > 30)) {
-                                    otherResponses.push(selection);
-                                } else {
-                                    // Normalize the response for consistent counting
-                                    const normalizedSelection = normalizeResponse(selection);
-                                    responses[normalizedSelection] = (responses[normalizedSelection] || 0) + 1;
-                                }
-                            });
+                            totalResponseCount++;
                         }
                     });
-                    
-                    // Convert to array and calculate percentages based on total respondents
-                    let responseArray = Object.entries(responses)
-                        .map(([text, count]) => ({
-                            text,
-                            count,
-                            percentage: totalResponseCount > 0 ? Math.round((count / totalResponseCount) * 100) : 0
-                        }));
-                    
-                    // Sort based on question type
-                    if (header.toLowerCase().includes('confident') || header.toLowerCase().includes('confidence')) {
-                        // Sort confidence scale 1-5 in order
-                        responseArray.sort((a, b) => {
-                            const aNum = parseInt(a.text);
-                            const bNum = parseInt(b.text);
-                            if (!isNaN(aNum) && !isNaN(bNum)) {
-                                return aNum - bNum;
-                            }
-                            return a.text.localeCompare(b.text);
-                        });
-                    } else {
-                        // Sort by count (highest first) for other questions
-                        responseArray.sort((a, b) => b.count - a.count);
-                    }
+
+                    const { responseArray, otherResponses } = parseQuestionData(header, rows, index, totalResponseCount);
                     
                     if (responseArray.length > 0) {
                         // Determine question type
