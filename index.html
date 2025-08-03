@@ -306,9 +306,10 @@
                         if (row[index] && row[index].trim()) {
                             const answer = row[index].trim();
                             
-                            // Handle multiple choice questions (responses separated by commas or semicolons)
-                            if (answer.includes(',') || answer.includes(';')) {
-                                const multipleAnswers = answer.split(/[,;]/).map(a => a.trim());
+                            // For multiple choice questions, don't split on commas within the answer text
+                            // Only split if it looks like multiple separate selections (semicolon separated)
+                            if (answer.includes(';')) {
+                                const multipleAnswers = answer.split(';').map(a => a.trim());
                                 multipleAnswers.forEach(ans => {
                                     if (ans) {
                                         responses[ans] = (responses[ans] || 0) + 1;
@@ -316,13 +317,9 @@
                                     }
                                 });
                             } else {
-                                // Check if it's an "Other" response (usually longer text)
-                                if (answer.length > 50 || answer.toLowerCase().includes('other')) {
-                                    otherResponses.push(answer);
-                                } else {
-                                    responses[answer] = (responses[answer] || 0) + 1;
-                                    totalResponses++;
-                                }
+                                // Treat as single response - don't split on commas
+                                responses[answer] = (responses[answer] || 0) + 1;
+                                totalResponses++;
                             }
                         }
                     });
@@ -443,9 +440,10 @@
                         if (row[index] && row[index].trim()) {
                             const answer = row[index].replace(/"/g, '').trim();
                             
-                            // Handle multiple choice questions (responses separated by commas or semicolons)
-                            if (answer.includes(',') || answer.includes(';')) {
-                                const multipleAnswers = answer.split(/[,;]/).map(a => a.trim());
+                            // For multiple choice questions, don't split on commas within the answer text
+                            // Only split if it looks like multiple separate selections (semicolon separated)
+                            if (answer.includes(';')) {
+                                const multipleAnswers = answer.split(';').map(a => a.trim());
                                 multipleAnswers.forEach(ans => {
                                     if (ans) {
                                         responses[ans] = (responses[ans] || 0) + 1;
@@ -453,13 +451,9 @@
                                     }
                                 });
                             } else {
-                                // Check if it's an "Other" response (usually longer text)
-                                if (answer.length > 50 || answer.toLowerCase().includes('other')) {
-                                    otherResponses.push(answer);
-                                } else {
-                                    responses[answer] = (responses[answer] || 0) + 1;
-                                    totalResponses++;
-                                }
+                                // Treat as single response - don't split on commas
+                                responses[answer] = (responses[answer] || 0) + 1;
+                                totalResponses++;
                             }
                         }
                     });
