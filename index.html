@@ -246,12 +246,6 @@
     </div>
 
     <script>
-        // Configuration - Update these with your Google Sheets details
-        const CONFIG = {
-            SHEET_ID: '1V3VpMGqEFC_qEa03om5bgSHQ8yQ0O-VIHAIi_DG0FHw',
-            API_KEY: 'AIzaSyArz5-KtMYQTEt9pxfdRXN3nQ1w39DhvEo',
-            SHEET_NAME: 'Sheet1'
-        };
 
         let surveyData = [];
 
@@ -549,114 +543,23 @@
             
             return questions.length > 0 ? questions : SAMPLE_DATA;
         }
-
-        // Function to load data from Google Sheets using public CSV method
-        async function loadFromGoogleSheets() {
+        async function loadFromSheet2API() {
             try {
-                // First try the API method
-                const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
-                
-                try {
-                    const apiResponse = await fetch(apiUrl);
-                    if (apiResponse.ok) {
-                        const data = await apiResponse.json();
-                        return parseSheetData(data);
-                    }
-                } catch (apiError) {
-                    console.log('API method failed, trying alternative method:', apiError);
-                }
-                
-                // Fallback: Try using public CSV export (requires sheet to be public)
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/export?format=csv&gid=0`;
-                const csvResponse = await fetch(csvUrl);
-                
-                if (!csvResponse.ok) {
-                    throw new Error(`HTTP error! status: ${csvResponse.status}. Make sure your Google Sheet is public (anyone with the link can view).`);
-                }
-                
-                const csvText = await csvResponse.text();
-                return parseCSVData(csvText);
-                
-            } catch (error) {
-                console.error('Error loading from Google Sheets:', error);
-                throw error;
+                const res = await fetch("https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live");
+                if (!res.ok) throw new Error("Sheet2API fetch failed");
+
+                const data = await res.json();
+
+                // Convert Sheet2API response to expected Google Sheets format
+                const sheetData = {
+                    values: [Object.keys(data[0]), ...data.map(Object.values)]
+                };
+
+                return parseSheetData(sheetData);
+            } catch (err) {
+                console.error(err);
+                throw err;
             }
-        }
-
-        // Function to parse CSV data into survey format
-        function parseCSVData(csvText) {
-            const lines = csvText.split('\n').filter(line => line.trim());
-            if (lines.length < 2) {
-                return SAMPLE_DATA;
-            }
-
-            const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-            const rows = lines.slice(1).map(line => {
-                // Simple CSV parsing (handles quoted values)
-                const values = [];
-                let current = '';
-                let inQuotes = false;
-                
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        values.push(current.trim());
-                        current = '';
-                    } else {
-                        current += char;
-                    }
-                }
-                values.push(current.trim());
-                return values;
-            });
-            
-            // Only process specific columns: H-L (indices 7-11) and R (index 17)
-            const targetColumns = [7, 8, 9, 10, 11, 17];
-            const questions = [];
-            
-            targetColumns.forEach(index => {
-                if (index < headers.length && headers[index] && headers[index].trim()) {
-                    const header = headers[index];
-                    let totalResponseCount = 0;
-                    
-                    // Count total respondents for this question
-                    rows.forEach(row => {
-                        if (row[index] && row[index].trim()) {
-                            totalResponseCount++;
-                        }
-                    });
-
-                    const { responseArray, otherResponses } = parseQuestionData(header, rows, index, totalResponseCount);
-                    
-                    if (responseArray.length > 0) {
-                        // Determine question type
-                        let questionType = "single_choice";
-                        if (header.toLowerCase().includes('select all') || header.toLowerCase().includes('pick top')) {
-                            questionType = "multiple_choice";
-                        } else if (header.toLowerCase().includes('confident') || header.includes('1-5')) {
-                            questionType = "scale";
-                        }
-                        
-                        const questionData = {
-                            question: header,
-                            type: questionType,
-                            responses: responseArray,
-                            total_responses: totalResponseCount
-                        };
-                        
-                        // Add other responses if any (show all verbatim, comma-separated)
-                        if (otherResponses.length > 0) {
-                            questionData.other_responses = otherResponses.join(', ');
-                        }
-                        
-                        questions.push(questionData);
-                    }
-                }
-            });
-            
-            return questions.length > 0 ? questions : SAMPLE_DATA;
         }
 
         // Function to render the dashboard
