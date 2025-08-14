@@ -348,7 +348,9 @@
                 "Marketplace Optimization (e.g. TikTok Shop, Amazon Influencer)",
                 "Internal Knowledge Systems & Institutional Memory"
             ];
-
+            console.log("📊 Sheet Headers:", headers);
+            headers.forEach((h, i) => console.log(`${i}: ${h}`));
+            
             rows.forEach(row => {
                 if (row[index] && row[index].trim()) {
                     const answer = row[index].trim();
