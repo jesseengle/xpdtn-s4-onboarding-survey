@@ -656,7 +656,7 @@
         // Main function to load survey data
         async function loadSurveyData() {
             try {
-                surveyData = await loadFromGoogleSheets();
+                surveyData = await loadFromSheet2API();
                 renderDashboard(surveyData);
             } catch (error) {
                 showError(error.message);
