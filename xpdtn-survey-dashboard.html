@@ -1,142 +1,246 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XPDTN Season 4 Survey Results</title>
+  <title>XPDTN Season 4 Survey Results - Live Dashboard</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background-color: #121212;
-      color: #fff;
-      padding: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #ffffff;
+      background: #1a1a1a;
     }
-    .question-block { margin-bottom: 3rem; }
-    .bar { margin: 0.5rem 0; }
-    .bar-label { font-weight: 500; margin-bottom: 0.2rem; }
-    .bar-fill {
-      background: #9d5fbe;
-      padding: 0.4rem;
-      color: white;
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #9ca3af;
+      font-size: 1.1em;
+    }
+    .container {
+      max-width: 100%;
+      margin: 0;
+      background: #1a1a1a;
+      padding: 0 16px;
+    }
+    .content {
+      padding: 5px 0 15px 0;
+      background: #1a1a1a;
+      max-width: 100%;
+    }
+    .section {
+      margin-bottom: 25px;
+    }
+    .survey-question {
+      background: #2a2a2a;
+      border-radius: 16px;
+      padding: 18px;
+      border: 1px solid #3a3a3a;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+      animation: slideIn 0.5s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .section-title {
+      font-size: 1.3em;
+      margin-bottom: 8px;
+      color: #ffffff;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .response-count {
+      color: #9ca3af;
+      font-size: 0.9em;
+      margin-bottom: 15px;
+    }
+    .responses-container {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 0 0 4px 0;
+      border: 1px solid #3a3a3a;
+    }
+    .response-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 18px;
+      margin-bottom: 4px;
+      border-radius: 6px;
+      position: relative;
+      background: #1a1a1a;
+      animation: fadeInBar 0.8s ease-out;
+    }
+    @keyframes fadeInBar {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .response-item:last-child { margin-bottom: 0; }
+    .response-content {
+      flex: 1;
+      margin-right: 15px;
+      z-index: 2;
+      position: relative;
+    }
+    .response-text {
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 1.1em;
+      line-height: 1.3;
+    }
+    .response-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      border-radius: 6px;
+    }
+    .response-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #625166, #4a3d52);
+      transition: width 1.2s ease-in-out;
+      opacity: 0.8;
+      border-radius: 6px;
+      width: 0%;
+    }
+    .response-stats {
       text-align: right;
-      border-radius: 4px;
+      flex-shrink: 0;
+      min-width: 75px;
+      z-index: 2;
+      position: relative;
     }
-    .bar-count { font-size: 0.85rem; opacity: 0.7; }
-    .other-responses { margin-top: 1rem; font-size: 0.9rem; opacity: 0.8; }
+    .response-percentage {
+      color: #625166;
+      font-weight: 700;
+      font-size: 1.2em;
+    }
+    .response-number {
+      color: #9ca3af;
+      font-size: 0.85em;
+    }
+    .other-responses {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 15px;
+      border: 1px solid #3a3a3a;
+      margin-top: 12px;
+    }
+    .other-title {
+      color: #625166;
+      font-weight: 600;
+      font-size: 1em;
+      margin-bottom: 6px;
+    }
+    .other-text {
+      color: #d1d5db;
+      line-height: 1.5;
+      font-size: 0.9em;
+    }
+    .update-time {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.75em;
+      margin-top: 15px;
+      margin-bottom: 20px;
+      padding: 8px;
+    }
   </style>
 </head>
 <body>
-  <h1>XPDTN Season 4 Survey Results</h1>
-  <div id="survey-container">Loading...</div>
-  
-<script>
-// XPDTN S4 Onboarding Survey Dashboard (Fixed)
+  <div id="dashboard-content">
+    <div class="loading">Loading survey data...</div>
+  </div>
+  <script>
+    const API_URL = 'https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live';
+    async function loadSurveyData() {
+      const container = document.getElementById('dashboard-content');
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        const headers = Object.keys(data[0]);
+        const questions = headers.filter(h => h.startsWith("How") || h.startsWith("What"));
+        const parsed = {};
 
-// Replace this URL with the live Sheet2API endpoint
-const SHEET2API_URL =
-  "https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live";
+        questions.forEach((q) => {
+          const responses = {};
+          const other = [];
+          data.forEach(row => {
+            const val = row[q];
+            if (!val) return;
+            const selections = String(val).split(',').map(s => s.trim());
+            selections.forEach(s => {
+              if (s.toLowerCase().startsWith("other")) {
+                const otherField = Object.keys(row).find(k => k.toLowerCase().includes("other"));
+                if (otherField && row[otherField]) other.push(row[otherField]);
+              } else {
+                responses[s] = (responses[s] || 0) + 1;
+              }
+            });
+          });
+          parsed[q] = { responses, other };
+        });
 
-async function loadSurveyData() {
-  const container = document.getElementById("survey-container");
-  container.innerHTML = "Loading...";
-
-  try {
-    const response = await fetch(SHEET2API_URL);
-    const data = await response.json();
-
-    const headers = Object.keys(data[0]);
-    console.log("📊 Sheet Headers:", headers);
-
-    const questions = getSurveyQuestions(headers);
-    const formattedData = parseSheetData(data, questions, headers);
-
-    container.innerHTML = "";
-    questions.forEach((question) => {
-      const questionData = formattedData[question];
-      const section = renderQuestionBlock(question, questionData);
-      container.appendChild(section);
-    });
-  } catch (error) {
-    container.innerHTML = "Error loading survey data.";
-    console.error("Failed to load survey data:", error);
-  }
-}
-
-function getSurveyQuestions(headers) {
-  return headers.filter((h) => h.startsWith("How") || h.startsWith("What"));
-}
-
-function parseSheetData(data, questions, headers) {
-  const result = {};
-  questions.forEach((q) => {
-    const values = data.map((row) => row[q]);
-    result[q] = parseQuestionData(q, values, data, headers);
-  });
-  return result;
-}
-
-function parseQuestionData(question, values, rows, headers) {
-  const counts = {};
-  const otherResponses = [];
-
-  values.forEach((val, i) => {
-    if (!val) return;
-    const selections = String(val).split(",").map((v) => v.trim());
-    selections.forEach((s) => {
-      if (s.toLowerCase().startsWith("other")) {
-        const openEnded = rows[i][headers.find((h) => h.toLowerCase().includes("other"))];
-        if (openEnded) otherResponses.push(openEnded);
-      } else {
-        counts[s] = (counts[s] || 0) + 1;
+        renderDashboard(parsed);
+      } catch (err) {
+        container.innerHTML = '<div class="error">Error loading data</div>';
+        console.error(err);
       }
-    });
-  });
+    }
 
-  return { counts, otherResponses };
-}
+    function renderDashboard(data) {
+      const container = document.getElementById('dashboard-content');
+      let html = '<div class="container"><div class="content">';
+      for (const [question, { responses, other }] of Object.entries(data)) {
+        const total = Object.values(responses).reduce((a, b) => a + b, 0);
+        html += `<div class="section"><div class="survey-question">`;
+        html += `<h2 class="section-title">${question}</h2>`;
+        html += `<div class="response-count">${total} responses</div><div class="responses-container">`;
+        Object.entries(responses).sort((a, b) => b[1] - a[1]).forEach(([text, count]) => {
+          const pct = Math.round((count / total) * 100);
+          html += `
+            <div class="response-item">
+              <div class="response-bar">
+                <div class="response-bar-fill" style="width: ${pct}%"></div>
+              </div>
+              <div class="response-content">
+                <div class="response-text">${text}</div>
+              </div>
+              <div class="response-stats">
+                <div class="response-percentage">${pct}%</div>
+                <div class="response-number">${count} response${count !== 1 ? 's' : ''}</div>
+              </div>
+            </div>`;
+        });
+        html += `</div>`;
+        if (other.length) {
+          html += `<div class="other-responses">
+                      <div class="other-title">Other responses:</div>
+                      <div class="other-text">${other.join(", ")}</div>
+                    </div>`;
+        }
+        html += `</div></div>`;
+      }
+      html += `<div class="update-time">Last updated: ${new Date().toLocaleString()}</div></div></div>`;
+      container.innerHTML = html;
+      setTimeout(() => {
+        const bars = document.querySelectorAll('.response-bar-fill');
+        bars.forEach((bar, i) => {
+          const width = bar.style.width;
+          bar.style.width = '0%';
+          setTimeout(() => bar.style.width = width, 100 + i * 40);
+        });
+      }, 100);
+    }
 
-function renderQuestionBlock(question, data) {
-  const block = document.createElement("div");
-  block.className = "question-block";
-
-  const title = document.createElement("h2");
-  title.innerText = question;
-  block.appendChild(title);
-
-  const total = Object.values(data.counts).reduce((a, b) => a + b, 0);
-
-  Object.entries(data.counts)
-    .sort((a, b) => b[1] - a[1])
-    .forEach(([label, count]) => {
-      const bar = document.createElement("div");
-      bar.className = "bar";
-
-      const percent = ((count / total) * 100).toFixed(0);
-
-      bar.innerHTML = `
-        <div class="bar-label">${label}</div>
-        <div class="bar-fill" style="width: ${percent}%">${percent}%</div>
-        <div class="bar-count">${count} responses</div>
-      `;
-      block.appendChild(bar);
-    });
-
-  if (data.otherResponses.length) {
-    const other = document.createElement("div");
-    other.className = "other-responses";
-    other.innerHTML = `<strong>Other responses:</strong> ${data.otherResponses.join(
-      ", "
-    )}`;
-    block.appendChild(other);
-  }
-
-  return block;
-}
-
-window.onload = loadSurveyData;
-</script>
-
+    document.addEventListener('DOMContentLoaded', loadSurveyData);
+  </script>
 </body>
 </html>
