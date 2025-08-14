@@ -83,7 +83,7 @@ function parseQuestionData(question, values, rows, headers) {
 
   values.forEach((val, i) => {
     if (!val) return;
-    const selections = val.split(",").map((v) => v.trim());
+    const selections = String(val).split(",").map((v) => v.trim());
     selections.forEach((s) => {
       if (s.toLowerCase().startsWith("other")) {
         const openEnded = rows[i][headers.find((h) => h.toLowerCase().includes("other"))];
