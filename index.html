@@ -547,7 +547,11 @@
         }
         async function loadFromSheet2API() {
             try {
-                const res = await fetch("https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live");
+                const res = await fetch(SHEET2API_ENDPOINT, {
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                });
                 if (!res.ok) throw new Error("Sheet2API fetch failed");
 
                 const data = await res.json();
