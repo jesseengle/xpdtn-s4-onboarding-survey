@@ -166,7 +166,7 @@
         const response = await fetch(API_URL);
         const data = await response.json();
         const headers = Object.keys(data[0]);
-        const questions = headers.filter(h => h.startsWith("How") || h.startsWith("What"));
+        const questions = headers.filter(h => h.startsWith("How") || h.startsWith("What") || h.startsWith("Are"));
         const parsed = {};
 
         questions.forEach((q) => {
