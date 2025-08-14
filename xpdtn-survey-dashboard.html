@@ -160,6 +160,20 @@
   </div>
   <script>
     const API_URL = 'https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live';
+
+    const TOOL_GROUPS = {
+      "ChatGPT": [/chat\s?gpt/i, /^gpt$/i],
+      "Claude": [/claude/i],
+      "Gemini": [/gemini/i]
+    };
+
+    function normalizeToolName(input) {
+      for (const [group, patterns] of Object.entries(TOOL_GROUPS)) {
+        if (patterns.some(p => p.test(input))) return group;
+      }
+      return "Other";
+    }
+
     async function loadSurveyData() {
       const container = document.getElementById('dashboard-content');
       try {
@@ -172,20 +186,53 @@
         questions.forEach((q) => {
           const responses = {};
           const other = [];
-          data.forEach(row => {
-            const val = row[q];
-            if (!val) return;
-            const selections = String(val).split(',').map(s => s.trim());
-            selections.forEach(s => {
-              if (s.toLowerCase().startsWith("other")) {
-                const otherField = Object.keys(row).find(k => k.toLowerCase().includes("other"));
-                if (otherField && row[otherField]) other.push(row[otherField]);
+
+          if (q.toLowerCase().includes("go-to ai tool")) {
+            // SPECIAL CASE: Normalize grouped tools
+            const groupedCounts = {
+              "ChatGPT": 0,
+              "Claude": 0,
+              "Gemini": 0,
+              "Other": []
+            };
+
+            data.forEach(row => {
+              const raw = row[q]?.trim();
+              if (!raw) return;
+
+              const norm = normalizeToolName(raw);
+              if (norm === "Other") {
+                groupedCounts.Other.push(raw);
               } else {
-                responses[s] = (responses[s] || 0) + 1;
+                groupedCounts[norm]++;
               }
             });
-          });
-          parsed[q] = { responses, other };
+
+            parsed[q] = {
+              responses: {
+                ChatGPT: groupedCounts.ChatGPT,
+                Claude: groupedCounts.Claude,
+                Gemini: groupedCounts.Gemini
+              },
+              other: groupedCounts.Other
+            };
+          } else {
+            // DEFAULT parsing logic
+            data.forEach(row => {
+              const val = row[q];
+              if (!val) return;
+              const selections = String(val).split(',').map(s => s.trim());
+              selections.forEach(s => {
+                if (s.toLowerCase().startsWith("other")) {
+                  const otherField = Object.keys(row).find(k => k.toLowerCase().includes("other"));
+                  if (otherField && row[otherField]) other.push(row[otherField]);
+                } else {
+                  responses[s] = (responses[s] || 0) + 1;
+                }
+              });
+            });
+            parsed[q] = { responses, other };
+          }
         });
 
         renderDashboard(parsed);
@@ -230,6 +277,8 @@
       }
       html += `<div class="update-time">Last updated: ${new Date().toLocaleString()}</div></div></div>`;
       container.innerHTML = html;
+
+      // Animate bars
       setTimeout(() => {
         const bars = document.querySelectorAll('.response-bar-fill');
         bars.forEach((bar, i) => {
