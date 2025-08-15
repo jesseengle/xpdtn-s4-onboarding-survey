@@ -1,96 +1,155 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XPDTN Survey Dashboard</title>
-  <style>
-    body {
-      background-color: #0c0c0c;
-      color: #f1f1f1;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 20px;
-      line-height: 1.6;
-    }
-
-    .question-block {
-      margin-bottom: 60px;
-      border-left: 3px solid #444;
-      padding-left: 20px;
-      animation: fadeIn 0.6s ease-in;
-    }
-
-    h2 {
-      color: #fff;
-      font-size: 1.2rem;
-      margin-bottom: 12px;
-    }
-
-    .bar-chart {
-      margin-top: 10px;
-    }
-
-    .bar {
-      display: flex;
-      align-items: center;
-      margin: 8px 0;
-      color: #fff;
-    }
-
-    .bar-label {
-      flex: 0 0 160px;
-      font-weight: bold;
-      color: #ccc;
-    }
-
-    .bar-fill {
-      height: 20px;
-      background: linear-gradient(to right, #4facfe, #00f2fe);
-      border-radius: 4px;
-      transition: width 0.5s ease-out;
-    }
-
-    .bar-count {
-      margin-left: 10px;
-      color: #aaa;
-      font-size: 0.9rem;
-    }
-
-    ul.other-list {
-      padding-left: 20px;
-      list-style-type: disc;
-      color: #ccc;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 600px) {
-      .bar-label {
-        flex: 0 0 100px;
-        font-size: 0.85rem;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XPDTN Season 4 Survey Results - Live Dashboard</title>
+<style>
+/* ... keep your original CSS styling here ... */
+</style>
 </head>
 <body>
-  <div class="question-block">
-    <h2>What’s your go-to AI tool?</h2>
-    <div class="bar-chart">
-      <div class="bar"><div class="bar-label">ChatGPT</div><div class="bar-fill" style="width: 70%;"></div><div class="bar-count">21</div></div>
-      <div class="bar"><div class="bar-label">Claude</div><div class="bar-fill" style="width: 30%;"></div><div class="bar-count">9</div></div>
-      <div class="bar"><div class="bar-label">Gemini</div><div class="bar-fill" style="width: 10%;"></div><div class="bar-count">3</div></div>
-    </div>
-    <h3 style="margin-top: 20px; font-size: 1rem;">Other responses:</h3>
-    <ul class="other-list">
-      <li>Perplexity</li>
-      <li>Notion AI</li>
-      <li>Midjourney</li>
-    </ul>
-  </div>
+<div id="dashboard-content">
+  <div class="loading">Loading survey data...</div>
+</div>
+
+<script>
+const API_URL = 'https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live';
+
+function normalizeResponse(text) {
+  const normalized = text.toLowerCase().trim();
+  if (normalized.includes('chatgpt') || normalized.includes('chat gpt') || normalized === 'gpt') return 'ChatGPT';
+  if (normalized.includes('claude')) return 'Claude';
+  if (normalized.includes('gemini')) return 'Gemini';
+  return text.trim();
+}
+
+function parseSurveyData(data) {
+  const targetColumns = [7, 8, 9, 10, 11, 17];
+  const headers = Object.keys(data[0]);
+  const questions = [];
+
+  targetColumns.forEach(index => {
+    const header = headers[index];
+    const responses = {};
+    let totalResponseCount = 0;
+    let otherResponses = [];
+
+    data.forEach(row => {
+      const answer = row[header];
+      if (answer && answer.trim()) {
+        totalResponseCount++;
+        const selections = answer.split(',').map(a => a.trim());
+
+        selections.forEach(selection => {
+          let normalized = normalizeResponse(selection);
+          if (header.toLowerCase().includes('go-to ai tool')) {
+            if (["ChatGPT", "Claude", "Gemini"].includes(normalized)) {
+              responses[normalized] = (responses[normalized] || 0) + 1;
+            } else {
+              responses["Other"] = (responses["Other"] || 0) + 1;
+              otherResponses.push(selection);
+            }
+          } else {
+            responses[selection] = (responses[selection] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    let responseArray = Object.entries(responses).map(([text, count]) => ({
+      text,
+      count,
+      percentage: totalResponseCount > 0 ? Math.round((count / totalResponseCount) * 100) : 0
+    }));
+
+    if (header.toLowerCase().includes('confident')) {
+      responseArray.sort((a, b) => parseInt(a.text) - parseInt(b.text));
+    } else {
+      responseArray.sort((a, b) => b.count - a.count);
+    }
+
+    questions.push({
+      question: header,
+      responses: responseArray,
+      total_responses: totalResponseCount,
+      other_responses: otherResponses.join(', ')
+    });
+  });
+
+  return questions;
+}
+
+function renderDashboard(data) {
+  let html = '<div class="container"><div class="content">';
+
+  data.forEach(question => {
+    html += `
+      <div class="section">
+        <div class="survey-question">
+          <h2 class="section-title">${question.question}</h2>
+          <div class="response-count">${question.total_responses} responses</div>
+          <div class="responses-container">
+    `;
+
+    question.responses.forEach(response => {
+      html += `
+        <div class="response-item">
+          <div class="response-bar">
+            <div class="response-bar-fill" style="width: ${response.percentage}%"></div>
+          </div>
+          <div class="response-content">
+            <div class="response-text">${response.text}</div>
+          </div>
+          <div class="response-stats">
+            <div class="response-percentage">${response.percentage}%</div>
+            <div class="response-number">${response.count} response${response.count !== 1 ? 's' : ''}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+
+    if (question.other_responses) {
+      html += `
+        <div class="other-responses">
+          <div class="other-title">Other responses:</div>
+          <div class="other-text">${question.other_responses}</div>
+        </div>
+      `;
+    }
+
+    html += '</div></div>';
+  });
+
+  html += `<div class="update-time">Last updated: ${new Date().toLocaleString()}</div></div></div>`;
+  document.getElementById('dashboard-content').innerHTML = html;
+
+  setTimeout(() => {
+    document.querySelectorAll('.response-bar-fill').forEach((bar, i) => {
+      const width = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => bar.style.width = width, 100 + i * 40);
+    });
+  }, 100);
+}
+
+async function loadSurveyData() {
+  const container = document.getElementById('dashboard-content');
+  try {
+    const response = await fetch(API_URL);
+    const data = await response.json();
+    const parsed = parseSurveyData(data);
+    renderDashboard(parsed);
+  } catch (err) {
+    container.innerHTML = '<div class="error">Error loading data</div>';
+    console.error(err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadSurveyData);
+</script>
+
 </body>
 </html>
