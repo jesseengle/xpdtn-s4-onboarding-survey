@@ -1,106 +1,149 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>XPDTN Survey Dashboard</title>
-  <style>
-    body {
-      background-color: #111;
-      color: #fff;
-      font-family: "Inter", sans-serif;
-      padding: 20px;
-      margin: 0;
-    }
-
-    .question {
-      margin-bottom: 40px;
-    }
-
-    .bar {
-      height: 30px;
-      background: linear-gradient(to right, #5eead4, #2dd4bf);
-      margin-bottom: 8px;
-      border-radius: 5px;
-      animation: grow 1s ease-out forwards;
-      transform: scaleX(0);
-      transform-origin: left;
-    }
-
-    .label {
-      margin-bottom: 4px;
-      font-size: 16px;
-      color: #ccc;
-    }
-
-    @keyframes grow {
-      to {
-        transform: scaleX(1);
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>XPDTN Season 4 Onboarding Survey</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+        }
+        h1, h2 {
+            color: #58a6ff;
+        }
+        .question {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #161b22;
+            border-radius: 8px;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        li {
+            background-color: #21262d;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        canvas {
+            background-color: #0d1117;
+        }
+    </style>
 </head>
 <body>
-  <div id="dashboard"></div>
+    <h1>XPDTN Season 4 Onboarding Survey</h1>
+    <div id="dashboard"></div>
 
-  <script>
-    const endpoint = 'https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live';
-    const columnsToShow = [
-      "Which of the following best describes how you’re using AI in your work today? (select all that apply)",
-      "What’s your go-to AI tool (if any) in your current workflow?",
-      "How confident are you in using AI tools in your creator marketing work?",
-      "Which areas of AI are you most curious to learn more about this season? (pick top 3)",
-      "What’s your top priority for this season? (pick 1)",
-      "Which areas of creator marketing would you be most interested in testing AI tools for?"
-    ];
-
-    async function loadSurveyData() {
-      try {
-        const res = await fetch(endpoint);
-        const data = await res.json();
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
         const dashboard = document.getElementById('dashboard');
 
-        columnsToShow.forEach((column) => {
-          const counts = {};
-          data.forEach(row => {
-            const value = row[column];
-            if (!value || typeof value !== 'string') return;
+        const columnsToDisplay = {
+            'Which of the following best describes how you’re using AI in your work today? (select all that apply)': 'AI Usage',
+            'What’s your go-to AI tool (if any) in your current workflow?': 'Go-To AI Tool',
+            'How confident are you in using AI tools in your creator marketing work?': 'Confidence Level',
+            'Which areas of AI are you most curious to learn more about this season? (pick top 3)': 'Curious AI Areas',
+            'What’s your top priority for this season? (pick 1)': 'Top Priority',
+            'Which areas of creator marketing would you be most interested in testing AI tools for?': 'AI x Creator Marketing'
+        };
 
-            value.split(',').map(v => v.trim()).forEach(option => {
-              if (!option) return;
-              counts[option] = (counts[option] || 0) + 1;
-            });
-          });
+        fetch('https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live')
+            .then(res => res.json())
+            .then(data => {
+                Object.entries(columnsToDisplay).forEach(([column, title]) => {
+                    const responses = data.map(row => row[column]).filter(r => r && r.trim().length > 0);
 
-          const total = Object.values(counts).reduce((a, b) => a + b, 0);
-          const container = document.createElement('div');
-          container.className = 'question';
-
-          Object.entries(counts)
-            .sort((a, b) => b[1] - a[1])
-            .forEach(([label, count]) => {
-              const pct = ((count / total) * 100).toFixed(1);
-
-              const labelEl = document.createElement('div');
-              labelEl.className = 'label';
-              labelEl.innerText = `${label} (${count})`;
-
-              const barEl = document.createElement('div');
-              barEl.className = 'bar';
-              barEl.style.width = `${pct}%`;
-
-              container.appendChild(labelEl);
-              container.appendChild(barEl);
+                    if (column.includes('confident')) {
+                        renderBarChart(title, responses);
+                    } else if (responses.every(resp => resp.includes(','))) {
+                        const flattened = responses.flatMap(resp => resp.split(',').map(s => s.trim()));
+                        renderBarChart(title, flattened);
+                    } else if (responses.every(resp => resp.length < 100)) {
+                        renderBarChart(title, responses);
+                    } else {
+                        renderTextResponses(title, responses);
+                    }
+                });
             });
 
-          dashboard.appendChild(container);
-        });
-      } catch (e) {
-        document.getElementById('dashboard').innerText = 'Error loading data';
-        console.error(e);
-      }
-    }
+        function renderBarChart(questionText, responses) {
+            const counts = {};
+            responses.forEach(r => counts[r] = (counts[r] || 0) + 1);
+            const container = document.createElement('div');
+            container.className = 'question';
+            const header = document.createElement('h2');
+            header.textContent = questionText;
+            container.appendChild(header);
+            const canvas = document.createElement('canvas');
+            container.appendChild(canvas);
+            dashboard.appendChild(container);
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(counts),
+                    datasets: [{
+                        label: 'Responses',
+                        data: Object.values(counts),
+                        backgroundColor: '#58a6ff'
+                    }]
+                },
+                options: {
+                    animation: {
+                        duration: 1000
+                    },
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#c9d1d9'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#c9d1d9'
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
-    loadSurveyData();
-  </script>
+        function renderTextResponses(questionText, responses) {
+            const container = document.createElement('div');
+            container.className = 'question';
+            const header = document.createElement('h2');
+            header.textContent = questionText;
+            container.appendChild(header);
+            const subheader = document.createElement('p');
+            const filtered = responses.filter(r => r && r.trim().length > 0);
+            subheader.textContent = `${filtered.length} responses`;
+            container.appendChild(subheader);
+
+            if (filtered.length === 0) {
+                const noData = document.createElement('p');
+                noData.textContent = 'No responses yet.';
+                container.appendChild(noData);
+            } else {
+                const list = document.createElement('ul');
+                filtered.forEach(response => {
+                    const li = document.createElement('li');
+                    li.textContent = response;
+                    list.appendChild(li);
+                });
+                container.appendChild(list);
+            }
+
+            dashboard.appendChild(container);
+        }
+    </script>
 </body>
 </html>
