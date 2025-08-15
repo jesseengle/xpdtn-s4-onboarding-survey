@@ -1,149 +1,124 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>XPDTN Season 4 Survey</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XPDTN Survey Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      background-color: #0d1117;
-      color: #e6edf3;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen;
-      margin: 0;
-      padding: 2rem;
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #121212;
+      color: #f0f0f0;
     }
-    .chart {
-      margin-bottom: 4rem;
+    h1, h2 {
+      color: #90caf9;
     }
-    h3 {
-      color: #58a6ff;
-      margin-bottom: 0.5rem;
+    .chart-container {
+      margin-bottom: 3rem;
+      background: #1e1e1e;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
     }
-    .bar {
-      background-color: #1f6feb;
-      height: 24px;
-      margin: 6px 0;
+    canvas {
+      background-color: #fff;
       border-radius: 4px;
-      animation: grow 0.7s ease-out;
-    }
-    @keyframes grow {
-      from { width: 0; }
-      to { width: 100%; }
-    }
-    .bar-label {
-      font-size: 14px;
-      margin-bottom: 2px;
-      color: #c9d1d9;
-    }
-    .bar-value {
-      font-size: 12px;
-      color: #8b949e;
     }
   </style>
 </head>
 <body>
+  <h1>XPDTN Season 4: Survey Dashboard</h1>
   <div id="charts"></div>
 
   <script>
-    const API_URL = "https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live";
+    const apiUrl = "https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live";
 
-    const fields = [
-      {
-        title: "How are you using AI today?",
-        key: "Which of the following best describes how you’re using AI in your work today? (select all that apply)"
-      },
-      {
-        title: "Go-to AI Tool",
-        key: "What’s your go-to AI tool (if any) in your current workflow?"
-      },
-      {
-        title: "Confidence using AI in Creator Marketing",
-        key: "How confident are you in using AI tools in your creator marketing work?"
-      },
-      {
-        title: "AI Topics You're Most Curious About",
-        key: "Which areas of AI are you most curious to learn more about this season? (pick top 3)"
-      },
-      {
-        title: "Your Top Priority This Season",
-        key: "What’s your top priority for this season? (pick 1)"
-      },
-      {
-        title: "Where You Want to Test AI Tools",
-        key: "Which areas of creator marketing would you be most interested in testing AI tools for?"
-      }
-    ];
-
-    function normalizeAnswer(answer) {
-      if (typeof answer === "string") {
-        return answer
-          .split(/[;,/]|(?:\r?\n)/) // split on common multi-select separators
-          .map(a => a.trim())
-          .filter(Boolean);
-      } else if (Array.isArray(answer)) {
-        return answer.map(a => a.trim()).filter(Boolean);
-      } else if (answer != null) {
-        return [String(answer).trim()];
-      }
-      return [];
-    }
-
-    function countAnswers(data, field) {
-      const counts = {};
-      data.forEach(row => {
-        const answers = normalizeAnswer(row[field] || "");
-        answers.forEach(a => {
-          counts[a] = (counts[a] || 0) + 1;
-        });
-      });
-      return counts;
-    }
-
-    function renderChart(title, counts) {
-      const container = document.createElement("div");
-      container.className = "chart";
-
-      const heading = document.createElement("h3");
-      heading.textContent = title;
-      container.appendChild(heading);
-
-      const total = Object.values(counts).reduce((a, b) => a + b, 0);
-      Object.entries(counts)
-        .sort((a, b) => b[1] - a[1])
-        .forEach(([label, value]) => {
-          const labelEl = document.createElement("div");
-          labelEl.className = "bar-label";
-          labelEl.textContent = label;
-          container.appendChild(labelEl);
-
-          const bar = document.createElement("div");
-          bar.className = "bar";
-          bar.style.width = `${(value / total) * 100}%`;
-          container.appendChild(bar);
-
-          const valueEl = document.createElement("div");
-          valueEl.className = "bar-value";
-          valueEl.textContent = `${value} response${value !== 1 ? "s" : ""}`;
-          container.appendChild(valueEl);
-        });
-
-      document.getElementById("charts").appendChild(container);
-    }
+    const chartQuestions = {
+      "Which of the following best describes how you’re using AI in your work today? (select all that apply)": "AI Usage Today",
+      "What’s your go-to AI tool (if any) in your current workflow?": "Go-To AI Tool",
+      "How confident are you in using AI tools in your creator marketing work?": "Confidence Level",
+      "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI Areas of Interest",
+      "What’s your top priority for this season? (pick 1)": "Top Priority This Season",
+      "Which areas of creator marketing would you be most interested in testing AI tools for?": "AI Test Areas in Creator Marketing"
+    };
 
     async function loadSurveyData() {
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch(apiUrl);
         const data = await res.json();
+        parseSurveyData(data);
+      } catch (e) {
+        document.body.innerHTML = "<h2>Error loading data</h2><pre>" + e + "</pre>";
+      }
+    }
 
-        fields.forEach(({ title, key }) => {
-          const counts = countAnswers(data, key);
-          if (Object.keys(counts).length > 0) {
-            renderChart(title, counts);
+    function parseSurveyData(data) {
+      const responseCount = data.length;
+      const questionStats = {};
+
+      for (const row of data) {
+        for (const col in chartQuestions) {
+          const readableTitle = chartQuestions[col];
+          const answer = row[col];
+
+          if (!questionStats[readableTitle]) {
+            questionStats[readableTitle] = {};
+          }
+
+          if (Array.isArray(answer)) {
+            answer.forEach(a => {
+              const trimmed = typeof a === 'string' ? a.trim() : '';
+              if (trimmed) questionStats[readableTitle][trimmed] = (questionStats[readableTitle][trimmed] || 0) + 1;
+            });
+          } else if (typeof answer === 'string') {
+            answer.split(",").forEach(a => {
+              const trimmed = a.trim();
+              if (trimmed) questionStats[readableTitle][trimmed] = (questionStats[readableTitle][trimmed] || 0) + 1;
+            });
+          }
+        }
+      }
+
+      renderCharts(questionStats, responseCount);
+    }
+
+    function renderCharts(stats, totalResponses) {
+      const chartsContainer = document.getElementById("charts");
+      for (const [title, answers] of Object.entries(stats)) {
+        const container = document.createElement("div");
+        container.className = "chart-container";
+        container.innerHTML = `<h2>${title}</h2><canvas id="${title.replace(/\s+/g, "-")}-chart"></canvas>`;
+        chartsContainer.appendChild(container);
+
+        const ctx = container.querySelector("canvas").getContext("2d");
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: Object.keys(answers),
+            datasets: [{
+              label: `Responses (${totalResponses})`,
+              data: Object.values(answers),
+              backgroundColor: "#90caf9"
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              tooltip: { mode: "index", intersect: false }
+            },
+            scales: {
+              x: { ticks: { color: "#f0f0f0" } },
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, color: "#f0f0f0" }
+              }
+            }
           }
         });
-      } catch (err) {
-        document.body.innerHTML = "<p style='color: red;'>Error loading data</p>";
-        console.error(err);
       }
     }
 
