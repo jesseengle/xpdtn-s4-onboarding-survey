@@ -1,295 +1,202 @@
+html_code = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XPDTN Season 4 Survey Results - Live Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.6;
-      color: #ffffff;
-      background: #1a1a1a;
-    }
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #9ca3af;
-      font-size: 1.1em;
-    }
-    .container {
-      max-width: 100%;
+      font-family: system-ui, sans-serif;
       margin: 0;
-      background: #1a1a1a;
-      padding: 0 16px;
+      padding: 1rem;
+      background: white;
+      color: #333;
     }
-    .content {
-      padding: 5px 0 15px 0;
-      background: #1a1a1a;
-      max-width: 100%;
+    .question {
+      margin-bottom: 2rem;
     }
-    .section {
-      margin-bottom: 25px;
+    .question h2 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
     }
-    .survey-question {
-      background: #2a2a2a;
-      border-radius: 16px;
-      padding: 18px;
-      border: 1px solid #3a3a3a;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-      animation: slideIn 0.5s ease-out;
-    }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .section-title {
-      font-size: 1.3em;
-      margin-bottom: 8px;
-      color: #ffffff;
-      font-weight: 600;
-      line-height: 1.3;
-    }
-    .response-count {
-      color: #9ca3af;
-      font-size: 0.9em;
-      margin-bottom: 15px;
-    }
-    .responses-container {
-      background: #1a1a1a;
-      border-radius: 12px;
-      padding: 0 0 4px 0;
-      border: 1px solid #3a3a3a;
-    }
-    .response-item {
+    .bar-container {
       display: flex;
-      align-items: center;
-      padding: 16px 18px;
-      margin-bottom: 4px;
-      border-radius: 6px;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .bar {
+      height: 24px;
+      background-color: #e0e0e0;
       position: relative;
-      background: #1a1a1a;
-      animation: fadeInBar 0.8s ease-out;
+      border-radius: 4px;
     }
-    @keyframes fadeInBar {
-      from { opacity: 0; transform: translateX(-20px); }
-      to { opacity: 1; transform: translateX(0); }
+    .bar-fill {
+      height: 100%;
+      background-color: #8ab4f8;
+      border-radius: 4px;
+      transition: width 0.3s ease;
     }
-    .response-item:last-child { margin-bottom: 0; }
-    .response-content {
-      flex: 1;
-      margin-right: 15px;
-      z-index: 2;
-      position: relative;
-    }
-    .response-text {
-      color: #ffffff;
-      font-weight: 600;
-      font-size: 1.1em;
-      line-height: 1.3;
-    }
-    .response-bar {
+    .bar-label {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      border-radius: 6px;
+      left: 8px;
+      top: 3px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #111;
     }
-    .response-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #625166, #4a3d52);
-      transition: width 1.2s ease-in-out;
-      opacity: 0.8;
-      border-radius: 6px;
-      width: 0%;
-    }
-    .response-stats {
-      text-align: right;
-      flex-shrink: 0;
-      min-width: 75px;
-      z-index: 2;
-      position: relative;
-    }
-    .response-percentage {
-      color: #625166;
-      font-weight: 700;
-      font-size: 1.2em;
-    }
-    .response-number {
-      color: #9ca3af;
-      font-size: 0.85em;
+    .bar-value {
+      position: absolute;
+      right: 8px;
+      top: 3px;
+      font-size: 0.9rem;
+      color: #333;
     }
     .other-responses {
-      background: #1a1a1a;
-      border-radius: 12px;
-      padding: 15px;
-      border: 1px solid #3a3a3a;
-      margin-top: 12px;
-    }
-    .other-title {
-      color: #625166;
-      font-weight: 600;
-      font-size: 1em;
-      margin-bottom: 6px;
-    }
-    .other-text {
-      color: #d1d5db;
-      line-height: 1.5;
-      font-size: 0.9em;
-    }
-    .update-time {
-      text-align: center;
-      color: #6b7280;
-      font-size: 0.75em;
-      margin-top: 15px;
-      margin-bottom: 20px;
-      padding: 8px;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #555;
     }
   </style>
 </head>
 <body>
-  <div id="dashboard-content">
-    <div class="loading">Loading survey data...</div>
-  </div>
+  <div id="charts"></div>
+
   <script>
-    const API_URL = 'https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live';
+    const endpoint = 'https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live';
 
-    const TOOL_GROUPS = {
-      "ChatGPT": [/chat\s?gpt/i, /^gpt$/i],
-      "Claude": [/claude/i],
-      "Gemini": [/gemini/i]
-    };
-
-    function normalizeToolName(input) {
-      for (const [group, patterns] of Object.entries(TOOL_GROUPS)) {
-        if (patterns.some(p => p.test(input))) return group;
-      }
-      return "Other";
+    async function fetchData() {
+      const res = await fetch(endpoint);
+      const rows = await res.json();
+      return rows;
     }
 
-    async function loadSurveyData() {
-      const container = document.getElementById('dashboard-content');
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        const headers = Object.keys(data[0]);
-        const questions = headers.filter(h => h.startsWith("How") || h.startsWith("What") || h.startsWith("Are"));
-        const parsed = {};
+    function countGroupedValues(data, key, groups = {}) {
+      const counts = {};
+      const other = [];
 
-        questions.forEach((q) => {
-          const responses = {};
-          const other = [];
+      for (const row of data) {
+        let value = (row[key] || '').trim();
+        if (!value) continue;
 
-          if (q.toLowerCase().includes("go-to ai tool")) {
-            // SPECIAL CASE: Normalize grouped tools
-            const groupedCounts = {
-              "ChatGPT": 0,
-              "Claude": 0,
-              "Gemini": 0,
-              "Other": []
-            };
-
-            data.forEach(row => {
-              const raw = row[q]?.trim();
-              if (!raw) return;
-
-              const norm = normalizeToolName(raw);
-              if (norm === "Other") {
-                groupedCounts.Other.push(raw);
-              } else {
-                groupedCounts[norm]++;
-              }
-            });
-
-            parsed[q] = {
-              responses: {
-                ChatGPT: groupedCounts.ChatGPT,
-                Claude: groupedCounts.Claude,
-                Gemini: groupedCounts.Gemini
-              },
-              other: groupedCounts.Other
-            };
-          } else {
-            // DEFAULT parsing logic
-            data.forEach(row => {
-              const val = row[q];
-              if (!val) return;
-              const selections = String(val).split(',').map(s => s.trim());
-              selections.forEach(s => {
-                if (s.toLowerCase().startsWith("other")) {
-                  const otherField = Object.keys(row).find(k => k.toLowerCase().includes("other"));
-                  if (otherField && row[otherField]) other.push(row[otherField]);
-                } else {
-                  responses[s] = (responses[s] || 0) + 1;
-                }
-              });
-            });
-            parsed[q] = { responses, other };
+        let matched = false;
+        for (const [label, aliases] of Object.entries(groups)) {
+          if (aliases.some(a => value.toLowerCase().includes(a.toLowerCase()))) {
+            counts[label] = (counts[label] || 0) + 1;
+            matched = true;
+            break;
           }
-        });
-
-        renderDashboard(parsed);
-      } catch (err) {
-        container.innerHTML = '<div class="error">Error loading data</div>';
-        console.error(err);
-      }
-    }
-
-    function renderDashboard(data) {
-      const container = document.getElementById('dashboard-content');
-      let html = '<div class="container"><div class="content">';
-      for (const [question, { responses, other }] of Object.entries(data)) {
-        const total = Object.values(responses).reduce((a, b) => a + b, 0);
-        html += `<div class="section"><div class="survey-question">`;
-        html += `<h2 class="section-title">${question}</h2>`;
-        html += `<div class="response-count">${total} responses</div><div class="responses-container">`;
-        Object.entries(responses).sort((a, b) => b[1] - a[1]).forEach(([text, count]) => {
-          const pct = Math.round((count / total) * 100);
-          html += `
-            <div class="response-item">
-              <div class="response-bar">
-                <div class="response-bar-fill" style="width: ${pct}%"></div>
-              </div>
-              <div class="response-content">
-                <div class="response-text">${text}</div>
-              </div>
-              <div class="response-stats">
-                <div class="response-percentage">${pct}%</div>
-                <div class="response-number">${count} response${count !== 1 ? 's' : ''}</div>
-              </div>
-            </div>`;
-        });
-        html += `</div>`;
-        if (other.length) {
-          html += `<div class="other-responses">
-                      <div class="other-title">Other responses:</div>
-                      <div class="other-text">${other.join(", ")}</div>
-                    </div>`;
         }
-        html += `</div></div>`;
-      }
-      html += `<div class="update-time">Last updated: ${new Date().toLocaleString()}</div></div></div>`;
-      container.innerHTML = html;
 
-      // Animate bars
-      setTimeout(() => {
-        const bars = document.querySelectorAll('.response-bar-fill');
-        bars.forEach((bar, i) => {
-          const width = bar.style.width;
-          bar.style.width = '0%';
-          setTimeout(() => bar.style.width = width, 100 + i * 40);
-        });
-      }, 100);
+        if (!matched) {
+          counts[value] = (counts[value] || 0) + 1;
+          if (!groups) other.push(value);
+        }
+      }
+
+      return { counts, other };
     }
 
-    document.addEventListener('DOMContentLoaded', loadSurveyData);
+    function renderBars(title, counts, options = {}) {
+      const container = document.getElementById('charts');
+      const question = document.createElement('div');
+      question.className = 'question';
+      const total = Object.values(counts).reduce((a, b) => a + b, 0);
+
+      const titleEl = document.createElement('h2');
+      titleEl.textContent = title;
+      question.appendChild(titleEl);
+
+      const barContainer = document.createElement('div');
+      barContainer.className = 'bar-container';
+
+      const sorted = Object.entries(counts).sort((a, b) => {
+        if (options.reverseOrder) return b[0] - a[0]; // numerical descending
+        return b[1] - a[1]; // frequency descending
+      });
+
+      if (options.explicitOrder) {
+        sorted.sort((a, b) => options.explicitOrder.indexOf(a[0]) - options.explicitOrder.indexOf(b[0]));
+      }
+
+      for (const [label, count] of sorted) {
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+
+        const fill = document.createElement('div');
+        fill.className = 'bar-fill';
+        fill.style.width = `${(count / total) * 100}%`;
+
+        const labelEl = document.createElement('div');
+        labelEl.className = 'bar-label';
+        labelEl.textContent = label;
+
+        const valueEl = document.createElement('div');
+        valueEl.className = 'bar-value';
+        valueEl.textContent = count;
+
+        bar.appendChild(fill);
+        bar.appendChild(labelEl);
+        bar.appendChild(valueEl);
+        barContainer.appendChild(bar);
+      }
+
+      question.appendChild(barContainer);
+      container.appendChild(question);
+    }
+
+    function renderOthers(title, list) {
+      if (list.length === 0) return;
+      const lastQ = document.querySelector('.question:last-child');
+      const other = document.createElement('div');
+      other.className = 'other-responses';
+      other.innerHTML = `<strong>Other responses:</strong> ${list.join(', ')}`;
+      lastQ.appendChild(other);
+    }
+
+    async function renderSurvey() {
+      const data = await fetchData();
+      const sample = data[0];
+
+      const keys = Object.keys(sample);
+      const targetKeys = [7, 8, 9, 10, 11, 17].map(i => keys[i]);
+
+      // Q1: Go-to AI Tool
+      const { counts: toolCounts, other: toolOthers } = countGroupedValues(data, targetKeys[0], {
+        "ChatGPT": ["chatgpt", "chat gpt"],
+        "Claude": ["claude"],
+        "Gemini": ["gemini"]
+      });
+      renderBars("What's your go-to AI tool?", toolCounts);
+      renderOthers("Other responses", Object.keys(toolCounts).filter(t => !["ChatGPT", "Claude", "Gemini"].includes(t)));
+
+      // Q2: Confidence rating (1–5, reverse order)
+      const confidenceCounts = {};
+      for (const row of data) {
+        const val = row[targetKeys[1]];
+        if (val) confidenceCounts[val] = (confidenceCounts[val] || 0) + 1;
+      }
+      renderBars("How confident are you in using AI in your workflow?", confidenceCounts, {
+        explicitOrder: ['5', '4', '3', '2', '1']
+      });
+
+      // Q3: How would you describe your AI pilot?
+      const pilotCounts = {};
+      for (const row of data) {
+        const val = row[targetKeys[2]];
+        if (val) pilotCounts[val] = (pilotCounts[val] || 0) + 1;
+      }
+      renderBars("How would you describe your AI pilot?", pilotCounts);
+
+      // Q6: What describes your brand’s POV on AI?
+      const povCounts = {};
+      for (const row of data) {
+        const val = row[targetKeys[5]];
+        if (val) povCounts[val] = (povCounts[val] || 0) + 1;
+      }
+      renderBars("What describes your brand’s POV on AI?", povCounts);
+    }
+
+    renderSurvey();
   </script>
 </body>
 </html>
