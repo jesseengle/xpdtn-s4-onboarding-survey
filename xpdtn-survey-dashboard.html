@@ -3,171 +3,94 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XPDTN Survey Results Dashboard (Sheet2API)</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>XPDTN Survey Dashboard</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 0 1rem;
+      background-color: #0c0c0c;
+      color: #f1f1f1;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
     }
+
     .question-block {
-      margin-bottom: 3rem;
+      margin-bottom: 60px;
+      border-left: 3px solid #444;
+      padding-left: 20px;
+      animation: fadeIn 0.6s ease-in;
     }
-    .chart-container {
-      position: relative;
-      width: 100%;
-      max-width: 600px;
-      margin: auto;
-    }
-    .question-label {
+
+    h2 {
+      color: #fff;
       font-size: 1.2rem;
-      margin: 1.5rem 0 0.5rem;
-      font-weight: bold;
-      text-align: center;
+      margin-bottom: 12px;
     }
-    .other-responses {
+
+    .bar-chart {
+      margin-top: 10px;
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      color: #fff;
+    }
+
+    .bar-label {
+      flex: 0 0 160px;
+      font-weight: bold;
+      color: #ccc;
+    }
+
+    .bar-fill {
+      height: 20px;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      border-radius: 4px;
+      transition: width 0.5s ease-out;
+    }
+
+    .bar-count {
+      margin-left: 10px;
+      color: #aaa;
       font-size: 0.9rem;
-      margin-top: 0.5rem;
-      text-align: center;
+    }
+
+    ul.other-list {
+      padding-left: 20px;
+      list-style-type: disc;
+      color: #ccc;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .bar-label {
+        flex: 0 0 100px;
+        font-size: 0.85rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="dashboard-content">Loading live survey data...</div>
-
-  <script>
-    const endpoint = "https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live";
-
-    const targetQuestions = [
-      { index: 7, label: "1. What's your go-to AI tool?" },
-      { index: 8, label: "2. How confident are you in your ability to integrate AI into your creator strategy?" },
-      { index: 9, label: "3. Have you tried using AI at work yet?" },
-      { index: 10, label: "6. What type of pilot might you want to try this season?" },
-      { index: 11, label: "7. Would you be open to teaming up with others for a pilot?" },
-      { index: 17, label: "8. Anything else you'd like to share as we kick off the season?" }
-    ];
-
-    const normalizeToolName = (val) => {
-      const v = val.trim().toLowerCase();
-      if (v.includes("chatgpt") || v.includes("chat gpt")) return "ChatGPT";
-      if (v.includes("claude")) return "Claude";
-      if (v.includes("gemini")) return "Gemini";
-      return val.trim();
-    };
-
-    const countResponses = (responses, normalize = false, order = null) => {
-      const counts = {};
-      for (const response of responses) {
-        const value = normalize ? normalizeToolName(response) : response.trim();
-        if (!value) continue;
-        counts[value] = (counts[value] || 0) + 1;
-      }
-      if (order) {
-        return order.map(label => ({ label, count: counts[label] || 0 }));
-      }
-      return Object.entries(counts)
-        .map(([label, count]) => ({ label, count }))
-        .sort((a, b) => b.count - a.count);
-    };
-
-    const fetchDataAndRender = async () => {
-      const res = await fetch(endpoint);
-      const json = await res.json();
-      const rows = json.data || json;
-
-      const container = document.getElementById("dashboard-content");
-      container.innerHTML = "";
-
-      for (const { index, label } of targetQuestions) {
-        const responses = rows.map(row => row[Object.keys(row)[index]]).filter(Boolean);
-
-        const block = document.createElement("div");
-        block.className = "question-block";
-
-        const questionTitle = document.createElement("div");
-        questionTitle.className = "question-label";
-        questionTitle.textContent = `${label} (${responses.length} responses)`;
-
-        block.appendChild(questionTitle);
-
-        if (index === 7) {
-          // Normalize ChatGPT, Claude, Gemini
-          const normalized = responses.map(normalizeToolName);
-          const grouped = countResponses(normalized, false);
-          const commonTools = ["ChatGPT", "Claude", "Gemini"];
-          const filtered = grouped.filter(item => commonTools.includes(item.label));
-          const others = grouped.filter(item => !commonTools.includes(item.label)).map(i => i.label);
-
-          const canvas = document.createElement("canvas");
-          block.appendChild(canvas);
-          new Chart(canvas.getContext("2d"), {
-            type: "bar",
-            data: {
-              labels: filtered.map(i => i.label),
-              datasets: [{ data: filtered.map(i => i.count), backgroundColor: "#3b82f6" }]
-            },
-            options: {
-              indexAxis: "y",
-              scales: { x: { beginAtZero: true } },
-              plugins: { legend: { display: false } }
-            }
-          });
-
-          const otherBlock = document.createElement("div");
-          otherBlock.className = "other-responses";
-          otherBlock.innerHTML = `<strong>Other responses:</strong> ${others.join(", ")}`;
-          block.appendChild(otherBlock);
-        } else if (index === 8) {
-          const confidenceOrder = ["5", "4", "3", "2", "1"];
-          const ordered = countResponses(responses, false, confidenceOrder);
-
-          const canvas = document.createElement("canvas");
-          block.appendChild(canvas);
-          new Chart(canvas.getContext("2d"), {
-            type: "bar",
-            data: {
-              labels: ordered.map(i => i.label),
-              datasets: [{ data: ordered.map(i => i.count), backgroundColor: "#10b981" }]
-            },
-            options: {
-              indexAxis: "y",
-              scales: { x: { beginAtZero: true } },
-              plugins: { legend: { display: false } }
-            }
-          });
-        } else if ([9, 10, 11].includes(index)) {
-          const counts = countResponses(responses);
-
-          const canvas = document.createElement("canvas");
-          block.appendChild(canvas);
-          new Chart(canvas.getContext("2d"), {
-            type: "bar",
-            data: {
-              labels: counts.map(i => i.label),
-              datasets: [{ data: counts.map(i => i.count), backgroundColor: "#6366f1" }]
-            },
-            options: {
-              indexAxis: "y",
-              scales: { x: { beginAtZero: true } },
-              plugins: { legend: { display: false } }
-            }
-          });
-        } else if (index === 17) {
-          const list = document.createElement("ul");
-          responses.forEach(resp => {
-            const li = document.createElement("li");
-            li.textContent = resp;
-            list.appendChild(li);
-          });
-          block.appendChild(list);
-        }
-
-        container.appendChild(block);
-      }
-    };
-
-    fetchDataAndRender();
-  </script>
+  <div class="question-block">
+    <h2>What’s your go-to AI tool?</h2>
+    <div class="bar-chart">
+      <div class="bar"><div class="bar-label">ChatGPT</div><div class="bar-fill" style="width: 70%;"></div><div class="bar-count">21</div></div>
+      <div class="bar"><div class="bar-label">Claude</div><div class="bar-fill" style="width: 30%;"></div><div class="bar-count">9</div></div>
+      <div class="bar"><div class="bar-label">Gemini</div><div class="bar-fill" style="width: 10%;"></div><div class="bar-count">3</div></div>
+    </div>
+    <h3 style="margin-top: 20px; font-size: 1rem;">Other responses:</h3>
+    <ul class="other-list">
+      <li>Perplexity</li>
+      <li>Notion AI</li>
+      <li>Midjourney</li>
+    </ul>
+  </div>
 </body>
 </html>
