@@ -1,201 +1,173 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XPDTN Survey Results Dashboard (Sheet2API)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      padding: 1rem;
-      background: white;
-      color: #333;
+      font-family: Arial, sans-serif;
+      padding: 0 1rem;
     }
-    .question {
-      margin-bottom: 2rem;
+    .question-block {
+      margin-bottom: 3rem;
     }
-    .question h2 {
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-    }
-    .bar-container {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .bar {
-      height: 24px;
-      background-color: #e0e0e0;
+    .chart-container {
       position: relative;
-      border-radius: 4px;
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
     }
-    .bar-fill {
-      height: 100%;
-      background-color: #8ab4f8;
-      border-radius: 4px;
-      transition: width 0.3s ease;
-    }
-    .bar-label {
-      position: absolute;
-      left: 8px;
-      top: 3px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #111;
-    }
-    .bar-value {
-      position: absolute;
-      right: 8px;
-      top: 3px;
-      font-size: 0.9rem;
-      color: #333;
+    .question-label {
+      font-size: 1.2rem;
+      margin: 1.5rem 0 0.5rem;
+      font-weight: bold;
+      text-align: center;
     }
     .other-responses {
-      margin-top: 0.5rem;
       font-size: 0.9rem;
-      color: #555;
+      margin-top: 0.5rem;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div id="charts"></div>
+  <div id="dashboard-content">Loading live survey data...</div>
 
   <script>
-    const endpoint = 'https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live';
+    const endpoint = "https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live";
 
-    async function fetchData() {
-      const res = await fetch(endpoint);
-      const rows = await res.json();
-      return rows;
-    }
+    const targetQuestions = [
+      { index: 7, label: "1. What's your go-to AI tool?" },
+      { index: 8, label: "2. How confident are you in your ability to integrate AI into your creator strategy?" },
+      { index: 9, label: "3. Have you tried using AI at work yet?" },
+      { index: 10, label: "6. What type of pilot might you want to try this season?" },
+      { index: 11, label: "7. Would you be open to teaming up with others for a pilot?" },
+      { index: 17, label: "8. Anything else you'd like to share as we kick off the season?" }
+    ];
 
-    function countGroupedValues(data, key, groups = {}) {
+    const normalizeToolName = (val) => {
+      const v = val.trim().toLowerCase();
+      if (v.includes("chatgpt") || v.includes("chat gpt")) return "ChatGPT";
+      if (v.includes("claude")) return "Claude";
+      if (v.includes("gemini")) return "Gemini";
+      return val.trim();
+    };
+
+    const countResponses = (responses, normalize = false, order = null) => {
       const counts = {};
-      const other = [];
-
-      for (const row of data) {
-        let value = (row[key] || '').trim();
+      for (const response of responses) {
+        const value = normalize ? normalizeToolName(response) : response.trim();
         if (!value) continue;
+        counts[value] = (counts[value] || 0) + 1;
+      }
+      if (order) {
+        return order.map(label => ({ label, count: counts[label] || 0 }));
+      }
+      return Object.entries(counts)
+        .map(([label, count]) => ({ label, count }))
+        .sort((a, b) => b.count - a.count);
+    };
 
-        let matched = false;
-        for (const [label, aliases] of Object.entries(groups)) {
-          if (aliases.some(a => value.toLowerCase().includes(a.toLowerCase()))) {
-            counts[label] = (counts[label] || 0) + 1;
-            matched = true;
-            break;
-          }
+    const fetchDataAndRender = async () => {
+      const res = await fetch(endpoint);
+      const json = await res.json();
+      const rows = json.data || json;
+
+      const container = document.getElementById("dashboard-content");
+      container.innerHTML = "";
+
+      for (const { index, label } of targetQuestions) {
+        const responses = rows.map(row => row[Object.keys(row)[index]]).filter(Boolean);
+
+        const block = document.createElement("div");
+        block.className = "question-block";
+
+        const questionTitle = document.createElement("div");
+        questionTitle.className = "question-label";
+        questionTitle.textContent = `${label} (${responses.length} responses)`;
+
+        block.appendChild(questionTitle);
+
+        if (index === 7) {
+          // Normalize ChatGPT, Claude, Gemini
+          const normalized = responses.map(normalizeToolName);
+          const grouped = countResponses(normalized, false);
+          const commonTools = ["ChatGPT", "Claude", "Gemini"];
+          const filtered = grouped.filter(item => commonTools.includes(item.label));
+          const others = grouped.filter(item => !commonTools.includes(item.label)).map(i => i.label);
+
+          const canvas = document.createElement("canvas");
+          block.appendChild(canvas);
+          new Chart(canvas.getContext("2d"), {
+            type: "bar",
+            data: {
+              labels: filtered.map(i => i.label),
+              datasets: [{ data: filtered.map(i => i.count), backgroundColor: "#3b82f6" }]
+            },
+            options: {
+              indexAxis: "y",
+              scales: { x: { beginAtZero: true } },
+              plugins: { legend: { display: false } }
+            }
+          });
+
+          const otherBlock = document.createElement("div");
+          otherBlock.className = "other-responses";
+          otherBlock.innerHTML = `<strong>Other responses:</strong> ${others.join(", ")}`;
+          block.appendChild(otherBlock);
+        } else if (index === 8) {
+          const confidenceOrder = ["5", "4", "3", "2", "1"];
+          const ordered = countResponses(responses, false, confidenceOrder);
+
+          const canvas = document.createElement("canvas");
+          block.appendChild(canvas);
+          new Chart(canvas.getContext("2d"), {
+            type: "bar",
+            data: {
+              labels: ordered.map(i => i.label),
+              datasets: [{ data: ordered.map(i => i.count), backgroundColor: "#10b981" }]
+            },
+            options: {
+              indexAxis: "y",
+              scales: { x: { beginAtZero: true } },
+              plugins: { legend: { display: false } }
+            }
+          });
+        } else if ([9, 10, 11].includes(index)) {
+          const counts = countResponses(responses);
+
+          const canvas = document.createElement("canvas");
+          block.appendChild(canvas);
+          new Chart(canvas.getContext("2d"), {
+            type: "bar",
+            data: {
+              labels: counts.map(i => i.label),
+              datasets: [{ data: counts.map(i => i.count), backgroundColor: "#6366f1" }]
+            },
+            options: {
+              indexAxis: "y",
+              scales: { x: { beginAtZero: true } },
+              plugins: { legend: { display: false } }
+            }
+          });
+        } else if (index === 17) {
+          const list = document.createElement("ul");
+          responses.forEach(resp => {
+            const li = document.createElement("li");
+            li.textContent = resp;
+            list.appendChild(li);
+          });
+          block.appendChild(list);
         }
 
-        if (!matched) {
-          counts[value] = (counts[value] || 0) + 1;
-          if (!groups) other.push(value);
-        }
+        container.appendChild(block);
       }
+    };
 
-      return { counts, other };
-    }
-
-    function renderBars(title, counts, options = {}) {
-      const container = document.getElementById('charts');
-      const question = document.createElement('div');
-      question.className = 'question';
-      const total = Object.values(counts).reduce((a, b) => a + b, 0);
-
-      const titleEl = document.createElement('h2');
-      titleEl.textContent = title;
-      question.appendChild(titleEl);
-
-      const barContainer = document.createElement('div');
-      barContainer.className = 'bar-container';
-
-      const sorted = Object.entries(counts).sort((a, b) => {
-        if (options.reverseOrder) return b[0] - a[0]; // numerical descending
-        return b[1] - a[1]; // frequency descending
-      });
-
-      if (options.explicitOrder) {
-        sorted.sort((a, b) => options.explicitOrder.indexOf(a[0]) - options.explicitOrder.indexOf(b[0]));
-      }
-
-      for (const [label, count] of sorted) {
-        const bar = document.createElement('div');
-        bar.className = 'bar';
-
-        const fill = document.createElement('div');
-        fill.className = 'bar-fill';
-        fill.style.width = `${(count / total) * 100}%`;
-
-        const labelEl = document.createElement('div');
-        labelEl.className = 'bar-label';
-        labelEl.textContent = label;
-
-        const valueEl = document.createElement('div');
-        valueEl.className = 'bar-value';
-        valueEl.textContent = count;
-
-        bar.appendChild(fill);
-        bar.appendChild(labelEl);
-        bar.appendChild(valueEl);
-        barContainer.appendChild(bar);
-      }
-
-      question.appendChild(barContainer);
-      container.appendChild(question);
-    }
-
-    function renderOthers(title, list) {
-      if (list.length === 0) return;
-      const lastQ = document.querySelector('.question:last-child');
-      const other = document.createElement('div');
-      other.className = 'other-responses';
-      other.innerHTML = `<strong>Other responses:</strong> ${list.join(', ')}`;
-      lastQ.appendChild(other);
-    }
-
-    async function renderSurvey() {
-      const data = await fetchData();
-      const sample = data[0];
-
-      const keys = Object.keys(sample);
-      const targetKeys = [7, 8, 9, 10, 11, 17].map(i => keys[i]);
-
-      // Q1: Go-to AI Tool
-      const { counts: toolCounts, other: toolOthers } = countGroupedValues(data, targetKeys[0], {
-        "ChatGPT": ["chatgpt", "chat gpt"],
-        "Claude": ["claude"],
-        "Gemini": ["gemini"]
-      });
-      renderBars("What's your go-to AI tool?", toolCounts);
-      renderOthers("Other responses", Object.keys(toolCounts).filter(t => !["ChatGPT", "Claude", "Gemini"].includes(t)));
-
-      // Q2: Confidence rating (1–5, reverse order)
-      const confidenceCounts = {};
-      for (const row of data) {
-        const val = row[targetKeys[1]];
-        if (val) confidenceCounts[val] = (confidenceCounts[val] || 0) + 1;
-      }
-      renderBars("How confident are you in using AI in your workflow?", confidenceCounts, {
-        explicitOrder: ['5', '4', '3', '2', '1']
-      });
-
-      // Q3: How would you describe your AI pilot?
-      const pilotCounts = {};
-      for (const row of data) {
-        const val = row[targetKeys[2]];
-        if (val) pilotCounts[val] = (pilotCounts[val] || 0) + 1;
-      }
-      renderBars("How would you describe your AI pilot?", pilotCounts);
-
-      // Q6: What describes your brand’s POV on AI?
-      const povCounts = {};
-      for (const row of data) {
-        const val = row[targetKeys[5]];
-        if (val) povCounts[val] = (povCounts[val] || 0) + 1;
-      }
-      renderBars("What describes your brand’s POV on AI?", povCounts);
-    }
-
-    renderSurvey();
+    fetchDataAndRender();
   </script>
 </body>
 </html>
