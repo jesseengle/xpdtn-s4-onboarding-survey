@@ -1,155 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XPDTN Season 4 Survey Results - Live Dashboard</title>
-<style>
-/* ... keep your original CSS styling here ... */
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>XPDTN Season 4 Survey</title>
+  <style>
+    body {
+      background-color: #0d1117;
+      color: #e6edf3;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen;
+      margin: 0;
+      padding: 2rem;
+    }
+    .chart {
+      margin-bottom: 4rem;
+    }
+    h3 {
+      color: #58a6ff;
+      margin-bottom: 0.5rem;
+    }
+    .bar {
+      background-color: #1f6feb;
+      height: 24px;
+      margin: 6px 0;
+      border-radius: 4px;
+      animation: grow 0.7s ease-out;
+    }
+    @keyframes grow {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+    .bar-label {
+      font-size: 14px;
+      margin-bottom: 2px;
+      color: #c9d1d9;
+    }
+    .bar-value {
+      font-size: 12px;
+      color: #8b949e;
+    }
+  </style>
 </head>
 <body>
-<div id="dashboard-content">
-  <div class="loading">Loading survey data...</div>
-</div>
+  <div id="charts"></div>
 
-<script>
-const API_URL = 'https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live';
+  <script>
+    const API_URL = "https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live";
 
-function normalizeResponse(text) {
-  const normalized = text.toLowerCase().trim();
-  if (normalized.includes('chatgpt') || normalized.includes('chat gpt') || normalized === 'gpt') return 'ChatGPT';
-  if (normalized.includes('claude')) return 'Claude';
-  if (normalized.includes('gemini')) return 'Gemini';
-  return text.trim();
-}
+    const fields = [
+      {
+        title: "How are you using AI today?",
+        key: "Which of the following best describes how you’re using AI in your work today? (select all that apply)"
+      },
+      {
+        title: "Go-to AI Tool",
+        key: "What’s your go-to AI tool (if any) in your current workflow?"
+      },
+      {
+        title: "Confidence using AI in Creator Marketing",
+        key: "How confident are you in using AI tools in your creator marketing work?"
+      },
+      {
+        title: "AI Topics You're Most Curious About",
+        key: "Which areas of AI are you most curious to learn more about this season? (pick top 3)"
+      },
+      {
+        title: "Your Top Priority This Season",
+        key: "What’s your top priority for this season? (pick 1)"
+      },
+      {
+        title: "Where You Want to Test AI Tools",
+        key: "Which areas of creator marketing would you be most interested in testing AI tools for?"
+      }
+    ];
 
-function parseSurveyData(data) {
-  const targetColumns = [7, 8, 9, 10, 11, 17];
-  const headers = Object.keys(data[0]);
-  const questions = [];
+    function normalizeAnswer(answer) {
+      if (typeof answer === "string") {
+        return answer
+          .split(/[;,/]|(?:\r?\n)/) // split on common multi-select separators
+          .map(a => a.trim())
+          .filter(Boolean);
+      } else if (Array.isArray(answer)) {
+        return answer.map(a => a.trim()).filter(Boolean);
+      } else if (answer != null) {
+        return [String(answer).trim()];
+      }
+      return [];
+    }
 
-  targetColumns.forEach(index => {
-    const header = headers[index];
-    const responses = {};
-    let totalResponseCount = 0;
-    let otherResponses = [];
+    function countAnswers(data, field) {
+      const counts = {};
+      data.forEach(row => {
+        const answers = normalizeAnswer(row[field] || "");
+        answers.forEach(a => {
+          counts[a] = (counts[a] || 0) + 1;
+        });
+      });
+      return counts;
+    }
 
-    data.forEach(row => {
-      const answer = row[header];
-      if (answer && answer.trim()) {
-        totalResponseCount++;
-        const selections = answer.split(',').map(a => a.trim());
+    function renderChart(title, counts) {
+      const container = document.createElement("div");
+      container.className = "chart";
 
-        selections.forEach(selection => {
-          let normalized = normalizeResponse(selection);
-          if (header.toLowerCase().includes('go-to ai tool')) {
-            if (["ChatGPT", "Claude", "Gemini"].includes(normalized)) {
-              responses[normalized] = (responses[normalized] || 0) + 1;
-            } else {
-              responses["Other"] = (responses["Other"] || 0) + 1;
-              otherResponses.push(selection);
-            }
-          } else {
-            responses[selection] = (responses[selection] || 0) + 1;
+      const heading = document.createElement("h3");
+      heading.textContent = title;
+      container.appendChild(heading);
+
+      const total = Object.values(counts).reduce((a, b) => a + b, 0);
+      Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([label, value]) => {
+          const labelEl = document.createElement("div");
+          labelEl.className = "bar-label";
+          labelEl.textContent = label;
+          container.appendChild(labelEl);
+
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          bar.style.width = `${(value / total) * 100}%`;
+          container.appendChild(bar);
+
+          const valueEl = document.createElement("div");
+          valueEl.className = "bar-value";
+          valueEl.textContent = `${value} response${value !== 1 ? "s" : ""}`;
+          container.appendChild(valueEl);
+        });
+
+      document.getElementById("charts").appendChild(container);
+    }
+
+    async function loadSurveyData() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        fields.forEach(({ title, key }) => {
+          const counts = countAnswers(data, key);
+          if (Object.keys(counts).length > 0) {
+            renderChart(title, counts);
           }
         });
+      } catch (err) {
+        document.body.innerHTML = "<p style='color: red;'>Error loading data</p>";
+        console.error(err);
       }
-    });
-
-    let responseArray = Object.entries(responses).map(([text, count]) => ({
-      text,
-      count,
-      percentage: totalResponseCount > 0 ? Math.round((count / totalResponseCount) * 100) : 0
-    }));
-
-    if (header.toLowerCase().includes('confident')) {
-      responseArray.sort((a, b) => parseInt(a.text) - parseInt(b.text));
-    } else {
-      responseArray.sort((a, b) => b.count - a.count);
     }
 
-    questions.push({
-      question: header,
-      responses: responseArray,
-      total_responses: totalResponseCount,
-      other_responses: otherResponses.join(', ')
-    });
-  });
-
-  return questions;
-}
-
-function renderDashboard(data) {
-  let html = '<div class="container"><div class="content">';
-
-  data.forEach(question => {
-    html += `
-      <div class="section">
-        <div class="survey-question">
-          <h2 class="section-title">${question.question}</h2>
-          <div class="response-count">${question.total_responses} responses</div>
-          <div class="responses-container">
-    `;
-
-    question.responses.forEach(response => {
-      html += `
-        <div class="response-item">
-          <div class="response-bar">
-            <div class="response-bar-fill" style="width: ${response.percentage}%"></div>
-          </div>
-          <div class="response-content">
-            <div class="response-text">${response.text}</div>
-          </div>
-          <div class="response-stats">
-            <div class="response-percentage">${response.percentage}%</div>
-            <div class="response-number">${response.count} response${response.count !== 1 ? 's' : ''}</div>
-          </div>
-        </div>
-      `;
-    });
-
-    html += '</div>';
-
-    if (question.other_responses) {
-      html += `
-        <div class="other-responses">
-          <div class="other-title">Other responses:</div>
-          <div class="other-text">${question.other_responses}</div>
-        </div>
-      `;
-    }
-
-    html += '</div></div>';
-  });
-
-  html += `<div class="update-time">Last updated: ${new Date().toLocaleString()}</div></div></div>`;
-  document.getElementById('dashboard-content').innerHTML = html;
-
-  setTimeout(() => {
-    document.querySelectorAll('.response-bar-fill').forEach((bar, i) => {
-      const width = bar.style.width;
-      bar.style.width = '0%';
-      setTimeout(() => bar.style.width = width, 100 + i * 40);
-    });
-  }, 100);
-}
-
-async function loadSurveyData() {
-  const container = document.getElementById('dashboard-content');
-  try {
-    const response = await fetch(API_URL);
-    const data = await response.json();
-    const parsed = parseSurveyData(data);
-    renderDashboard(parsed);
-  } catch (err) {
-    container.innerHTML = '<div class="error">Error loading data</div>';
-    console.error(err);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', loadSurveyData);
-</script>
-
+    loadSurveyData();
+  </script>
 </body>
 </html>
