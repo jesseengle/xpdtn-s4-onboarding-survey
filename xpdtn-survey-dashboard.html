@@ -1,1583 +1,181 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>XPDTN Season 4 Survey Results - Live Dashboard</title>
-<style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #ffffff;
-            background: #1a1a1a;
-        }
-
-        .container {
-            max-width: 100%;
-            margin: 0;
-            background: #1a1a1a;
-            padding: 0 16px;
-        }
-
-        .content {
-            padding: 5px 0 15px 0;
-            background: #1a1a1a;
-            max-width: 100%;
-        }
-
-        .section {
-            margin-bottom: 25px;
-        }
-
-        .survey-question {
-            background: #2a2a2a;
-            border-radius: 16px;
-            padding: 18px;
-            border: 1px solid #3a3a3a;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-        }
-
-        .section-title {
-            font-size: 1.3em;
-            margin-bottom: 8px;
-            color: #ffffff;
-            font-weight: 600;
-            line-height: 1.3;
-        }
-
-        .response-count {
-            color: #9ca3af;
-            font-size: 0.9em;
-            margin-bottom: 15px;
-        }
-
-        .responses-container {
-            background: #1a1a1a;
-            border-radius: 12px;
-            padding: 0 0 4px 0;
-            border: 1px solid #3a3a3a;
-        }
-
-        .response-item {
-            display: flex;
-            align-items: center;
-            padding: 16px 18px;
-            margin-bottom: 4px;
-            border-radius: 6px;
-            position: relative;
-            background: #1a1a1a;
-        }
-
-        .response-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .response-content {
-            flex: 1;
-            margin-right: 15px;
-            z-index: 2;
-            position: relative;
-        }
-
-        .response-text {
-            color: #ffffff;
-            font-weight: 600;
-            margin-bottom: 0;
-            font-size: 1.1em;
-            line-height: 1.3;
-        }
-
-        .response-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            border-radius: 6px;
-        }
-
-        .response-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #625166, #4a3d52);
-            transition: width 1.2s ease-in-out;
-            opacity: 0.8;
-            border-radius: 6px;
-            width: 0%;
-        }
-
-        .response-stats {
-            text-align: right;
-            flex-shrink: 0;
-            min-width: 75px;
-            z-index: 2;
-            position: relative;
-        }
-
-        .response-percentage {
-            color: #625166;
-            font-weight: 700;
-            font-size: 1.2em;
-        }
-
-        .response-number {
-            color: #9ca3af;
-            font-size: 0.85em;
-            margin-top: 1px;
-        }
-
-        .update-time {
-            text-align: center;
-            color: #6b7280;
-            font-size: 0.75em;
-            margin-top: 15px;
-            margin-bottom: 20px;
-            padding: 8px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>XPDTN Survey Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 2em;
+    }
+    h2 {
+      color: #fff;
+      margin-top: 3em;
+    }
+    .chart-container {
+      margin-bottom: 60px;
+      background: #1a1a1a;
+      border-radius: 10px;
+      padding: 20px;
+    }
+    canvas {
+      max-width: 100%;
+    }
+    .other-responses {
+      font-size: 0.9em;
+      margin-top: 0.5em;
+      color: #aaa;
+    }
+  </style>
 </head>
 <body>
-<div id="dashboard-content">
-<div class="container">
-<div class="content">
-<div class="section">
-<div class="survey-question">
-<h2 class="section-title">How are you using AI in your work today?</h2>
-<div class="response-count">5 responses</div>
-<div class="responses-container">
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 80%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Writing emails, captions, or campaign copy</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">80%</div>
-<div class="response-number">4 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 80%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Drafting or reviewing creative briefs</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">80%</div>
-<div class="response-number">4 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 60%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Analyzing campaign results</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">60%</div>
-<div class="response-number">3 responses</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="section">
-<div class="survey-question">
-<h2 class="section-title">What's your go-to AI tool?</h2>
-<div class="response-count">5 responses</div>
-<div class="responses-container">
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 60%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">ChatGPT</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">60%</div>
-<div class="response-number">3 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 20%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Claude</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">20%</div>
-<div class="response-number">1 response</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 20%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Other</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">20%</div>
-<div class="response-number">1 response</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="section">
-<div class="survey-question">
-<h2 class="section-title">How confident are you in using AI tools in your creator marketing work?</h2>
-<div class="response-count">5 responses</div>
-<div class="responses-container">
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 20%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">1 - Not confident</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">20%</div>
-<div class="response-number">1 response</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 40%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">3 - Somewhat confident</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">40%</div>
-<div class="response-number">2 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 40%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">4 - Very confident</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">40%</div>
-<div class="response-number">2 responses</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="section">
-<div class="survey-question">
-<h2 class="section-title">Which areas of AI are you most curious to learn more about this season?</h2>
-<div class="response-count">5 responses</div>
-<div class="responses-container">
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 60%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">AI assistants &amp; internal tooling</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">60%</div>
-<div class="response-number">3 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 40%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">AI for creator discovery</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">40%</div>
-<div class="response-number">2 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 40%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">AI and the future of creator platforms</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">40%</div>
-<div class="response-number">2 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 20%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">AI for reviewing creator content</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">20%</div>
-<div class="response-number">1 response</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="section">
-<div class="survey-question">
-<h2 class="section-title">What's your top priority for this season?</h2>
-<div class="response-count">5 responses</div>
-<div class="responses-container">
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 60%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Learning from guest speakers</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">60%</div>
-<div class="response-number">3 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 40%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Swapping tactics/tools with peers</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">40%</div>
-<div class="response-number">2 responses</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="section">
-<div class="survey-question">
-<h2 class="section-title">Which areas of creator marketing would you be most interested in testing AI tools for?</h2>
-<div class="response-count">5 responses</div>
-<div class="responses-container">
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 60%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Performance Analysis &amp; Reporting</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">60%</div>
-<div class="response-number">3 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 40%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Outreach &amp; Communication</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">40%</div>
-<div class="response-number">2 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 40%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Content Review &amp; Brand Safety</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">40%</div>
-<div class="response-number">2 responses</div>
-</div>
-</div>
-<div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: 20%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">Creator Discovery &amp; Vetting</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">20%</div>
-<div class="response-number">1 response</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="update-time">
-                    Last updated: 8/14/2025, 3:30:00 PM
-                </div>
-<script>
-        // Fallback data (most recent data we successfully fetched)
-        const FALLBACK_DATA = [
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results, Generating images or video",
-                "What's your go-to AI tool (if any) in your current workflow?": "chatgpt covers almost all the tasks i needed to optimize so far",
-                "How confident are you in using AI tools in your creator marketing work?": "3",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for reviewing creator content, AI assistants & internal tooling, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Learning from guest speakers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Outreach & Communication, Content Review & Brand Safety, Performance Analysis & Reporting, Creative Co-Pilots for UGC, Internal Knowledge Systems & Institutional Memory, Competitor Monitoring & Trend Tracking"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy",
-                "What's your go-to AI tool (if any) in your current workflow?": "Gemini & Chat GPT",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for campaign planning & briefing, How creators themselves are using AI",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Brief Generation & Campaign Planning, Performance Analysis & Reporting, Competitor Monitoring & Trend Tracking"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results",
-                "What's your go-to AI tool (if any) in your current workflow?": "Claude",
-                "How confident are you in using AI tools in your creator marketing work?": "3",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI assistants & internal tooling",
-                "What's your top priority for this season? (pick 1)": "Learning from guest speakers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Outreach & Communication"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, ai tools that speed up creative workflow like rotoscoping, photoshop generative AI",
-                "What's your go-to AI tool (if any) in your current workflow?": "chatgpt, gemini",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "Ethical implications / disclosure guidelines, How creators themselves are using AI, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Competitor Monitoring & Trend Tracking, Performance Analysis & Reporting, Marketplace Optimization (e.g. TikTok Shop, Amazon Influencer)"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results",
-                "What's your go-to AI tool (if any) in your current workflow?": "chatgpt",
-                "How confident are you in using AI tools in your creator marketing work?": "2",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for campaign planning & briefing, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Having a regular space to reflect and stay sharp",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Brief Generation & Campaign Planning, Outreach & Communication, Performance Analysis & Reporting"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Discovering or researching creators",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chat GPT",
-                "How confident are you in using AI tools in your creator marketing work?": "2",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI assistants & internal tooling, AI and brand safety, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Learning from guest speakers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Performance Analysis & Reporting, Competitor Monitoring & Trend Tracking, Creative Co-Pilots for UGC"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Analyzing campaign results, Drafting or reviewing creative briefs, Scripting, Creative Ideation",
-                "What's your go-to AI tool (if any) in your current workflow?": "Claude, ChatGPT, Poppy AI",
-                "How confident are you in using AI tools in your creator marketing work?": "3",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "How creators themselves are using AI, AI and the future of creator platforms, AI-generated content (video, images, voice)",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creative Co-Pilots for UGC, Competitor Monitoring & Trend Tracking"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results",
-                "What's your go-to AI tool (if any) in your current workflow?": "Claude AI",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for reviewing creator content, AI for campaign planning & briefing",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creative Co-Pilots for UGC, Competitor Monitoring & Trend Tracking, Outreach & Communication, Creator Discovery & Vetting, Brief Generation & Campaign Planning, Content Review & Brand Safety, Performance Analysis & Reporting, Payment, Contracting & Legal Automation"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results",
-                "What's your go-to AI tool (if any) in your current workflow?": "ChatGPT, Gamma for presentations",
-                "How confident are you in using AI tools in your creator marketing work?": "3",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI assistants & internal tooling, AI for creator discovery, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Having a regular space to reflect and stay sharp",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Payment, Contracting & Legal Automation, Performance Analysis & Reporting, Internal Knowledge Systems & Institutional Memory"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "I'm not using AI at work yet",
-                "What's your go-to AI tool (if any) in your current workflow?": "chatgpt",
-                "How confident are you in using AI tools in your creator marketing work?": "1",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI assistants & internal tooling, AI for creator discovery, AI for reviewing creator content",
-                "What's your top priority for this season? (pick 1)": "Connecting 1:1 with others in similar roles",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Outreach & Communication, Content Review & Brand Safety, Brief Generation & Campaign Planning"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results",
-                "What's your go-to AI tool (if any) in your current workflow?": "ChatGPT",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for reviewing creator content, AI assistants & internal tooling",
-                "What's your top priority for this season? (pick 1)": "Having a regular space to reflect and stay sharp",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Brief Generation & Campaign Planning, Content Review & Brand Safety, Performance Analysis & Reporting, Competitor Monitoring & Trend Tracking, Creative Co-Pilots for UGC, Outreach & Communication"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Writing emails, captions, or campaign copy, Drafting or reviewing creative briefs, Discovering or researching creators",
-                "What's your go-to AI tool (if any) in your current workflow?": "Gemini",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI assistants & internal tooling, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Performance Analysis & Reporting, Content Review & Brand Safety, Competitor Monitoring & Trend Tracking"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results, Generating images or video",
-                "What's your go-to AI tool (if any) in your current workflow?": "ElevenLabs, Claude, GPT, Gemini, n8n, zapier, heygen",
-                "How confident are you in using AI tools in your creator marketing work?": "5",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for campaign planning & briefing, Lead enrichment and personalised outreach",
-                "What's your top priority for this season? (pick 1)": "Connecting 1:1 with others in similar roles",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Outreach & Communication, Brief Generation & Campaign Planning, Performance Analysis & Reporting"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chat GPT and Perplexity",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for reviewing creator content, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Having a regular space to reflect and stay sharp",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Brief Generation & Campaign Planning, Content Review & Brand Safety, Performance Analysis & Reporting, Competitor Monitoring & Trend Tracking"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Writing emails, captions, or campaign copy, Discovering or researching creators, Drafting or reviewing creative briefs",
-                "What's your go-to AI tool (if any) in your current workflow?": "ChatGPT, Favikon",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Connecting 1:1 with others in similar roles",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Outreach & Communication, Performance Analysis & Reporting, Internal Knowledge Systems & Institutional Memory"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, used in Brand Safety tools we use",
-                "What's your go-to AI tool (if any) in your current workflow?": "n/a",
-                "How confident are you in using AI tools in your creator marketing work?": "3",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI assistants & internal tooling, AI and brand safety, How others are utilizing AI for their workflows. Example: a look into Teachable's use of Claude for their dashboards",
-                "What's your top priority for this season? (pick 1)": "Connecting 1:1 with others in similar roles",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Internal Knowledge Systems & Institutional Memory, Brief Generation & Campaign Planning, Creator Discovery & Vetting, Performance Analysis & Reporting"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chat GPT",
-                "How confident are you in using AI tools in your creator marketing work?": "2",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for campaign planning & briefing",
-                "What's your top priority for this season? (pick 1)": "Learning from guest speakers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Brief Generation & Campaign Planning, Creator Discovery & Vetting"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results, Generating images or video",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chatgpt",
-                "How confident are you in using AI tools in your creator marketing work?": "5",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI-generated content (video, images, voice), AI assistants & internal tooling, How creators themselves are using AI",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Performance Analysis & Reporting, Internal Knowledge Systems & Institutional Memory, Outreach & Communication"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Writing emails, captions, or campaign copy, Discovering or researching creators",
-                "What's your go-to AI tool (if any) in your current workflow?": "ChatGPT",
-                "How confident are you in using AI tools in your creator marketing work?": "3",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for campaign planning & briefing, AI for reviewing creator content, AI assistants & internal tooling",
-                "What's your top priority for this season? (pick 1)": "Connecting 1:1 with others in similar roles",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": ""
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Generating images or video",
-                "What's your go-to AI tool (if any) in your current workflow?": "ChatGPT and Spotter Studio",
-                "How confident are you in using AI tools in your creator marketing work?": "5",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI assistants & internal tooling, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Outreach & Communication, Performance Analysis & Reporting, Marketplace Optimization (e.g. TikTok Shop, Amazon Influencer)"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators",
-                "What's your go-to AI tool (if any) in your current workflow?": "Don't have one!",
-                "How confident are you in using AI tools in your creator marketing work?": "1",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for campaign planning & briefing, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Brief Generation & Campaign Planning, Outreach & Communication, Content Review & Brand Safety, Other"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy",
-                "What's your go-to AI tool (if any) in your current workflow?": "ChatGPT",
-                "How confident are you in using AI tools in your creator marketing work?": "2",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI assistants & internal tooling, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Outreach & Communication, Content Review & Brand Safety, Payment, Contracting & Legal Automation"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chat GPT",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for reviewing creator content, AI assistants & internal tooling, How creators themselves are using AI",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Outreach & Communication, Content Review & Brand Safety, Performance Analysis & Reporting"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Generating images or video",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chatgpt, Heygen, Sora",
-                "How confident are you in using AI tools in your creator marketing work?": "3",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for reviewing creator content, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Discovering new AI use cases",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery & Vetting, Performance Analysis & Reporting, Internal Knowledge Systems & Institutional Memory"
-            }
-        ];
+  <div id="dashboard"></div>
+  <script>
+    const endpoint = "https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live";
 
-        // Fetch live data from Sheet2API
-        async function fetchLiveData() {
-            const proxies = [
-                'https://api.allorigins.win/raw?url=https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live',
-                'https://corsproxy.io/?https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live'
-            ];
-            
-            for (let i = 0; i < proxies.length; i++) {
-                try {
-                    console.log(`Trying proxy ${i + 1}/${proxies.length}:`, proxies[i]);
-                    
-                    const response = await fetch(proxies[i], {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                        },
-                        // Add timeout
-                        signal: AbortSignal.timeout(10000) // 10 second timeout
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    
-                    const data = await response.json();
-                    
-                    if (data && Array.isArray(data) && data.length > 0) {
-                        console.log(`✅ Success! Fetched ${data.length} live responses via proxy ${i + 1}`);
-                        return data;
-                    } else {
-                        throw new Error('Invalid data format received');
-                    }
-                    
-                } catch (error) {
-                    console.log(`❌ Proxy ${i + 1} failed:`, error.message);
-                    if (i === proxies.length - 1) {
-                        throw error; // Last proxy failed
-                    }
-                }
-            }
-        }
+    const chartConfigs = [
+      {
+        label: "How are you using AI today?",
+        key: "Which of the following best describes how you’re using AI in your work today? (select all that apply)"
+      },
+      {
+        label: "What’s your go-to AI tool?",
+        key: "What’s your go-to AI tool (if any) in your current workflow?",
+        normalize: true,
+        threshold: 3
+      },
+      {
+        label: "Confidence in using AI",
+        key: "How confident are you in using AI tools in your creator marketing work?"
+      },
+      {
+        label: "Areas of AI you want to learn about",
+        key: "Which areas of AI are you most curious to learn more about this season? (pick top 3)"
+      },
+      {
+        label: "Top priority for this season",
+        key: "What’s your top priority for this season? (pick 1)"
+      },
+      {
+        label: "Where you want to test AI tools",
+        key: "Which areas of creator marketing would you be most interested in testing AI tools for?"
+      }
+    ];
 
-        // Process the survey data (same logic as before)
-        function processSurveyData(surveyResponses) {
-            const totalResponses = surveyResponses.length;
-            
-            // Process AI Usage Question
-            const aiUsageCount = {};
-            const predefinedAIUsage = [
-                "Discovering or researching creators",
-                "Drafting or reviewing creative briefs", 
-                "Writing emails, captions, or campaign copy",
-                "Analyzing campaign results",
-                "Generating images or video",
-                "I'm not using AI at work yet"
-            ];
-            
-            let otherAIUsage = [];
-            
-            surveyResponses.forEach(response => {
-                const usage = response["Which of the following best describes how you're using AI in your work today? (select all that apply)"];
-                if (usage) {
-                    predefinedAIUsage.forEach(option => {
-                        if (usage.toLowerCase().includes(option.toLowerCase())) {
-                            aiUsageCount[option] = (aiUsageCount[option] || 0) + 1;
-                        }
-                    });
-                    
-                    // Capture other responses
-                    let remainingText = usage;
-                    predefinedAIUsage.forEach(option => {
-                        remainingText = remainingText.replace(new RegExp(option, 'gi'), '');
-                    });
-                    const cleaned = remainingText.split(',').map(s => s.trim()).filter(s => s && s.length > 2);
-                    otherAIUsage.push(...cleaned);
-                }
-            });
-            
-            // Process AI Tools Question
-            const toolCount = {};
-            surveyResponses.forEach(response => {
-                const tool = response["What's your go-to AI tool (if any) in your current workflow?"];
-                if (tool) {
-                    const normalized = tool.toLowerCase();
-                    if (normalized.includes('chatgpt') || normalized.includes('chat gpt')) {
-                        toolCount['ChatGPT'] = (toolCount['ChatGPT'] || 0) + 1;
-                    } else if (normalized.includes('claude')) {
-                        toolCount['Claude'] = (toolCount['Claude'] || 0) + 1;
-                    } else if (normalized.includes('gemini')) {
-                        toolCount['Gemini'] = (toolCount['Gemini'] || 0) + 1;
-                    } else if (normalized.includes('other') || normalized.includes('n/a') || normalized.includes("don't")) {
-                        toolCount['Other/None'] = (toolCount['Other/None'] || 0) + 1;
-                    } else {
-                        toolCount['Other'] = (toolCount['Other'] || 0) + 1;
-                    }
-                }
-            });
-            
-            // Process Confidence Question
-            const confidenceCount = {};
-            surveyResponses.forEach(response => {
-                const confidence = response["How confident are you in using AI tools in your creator marketing work?"];
-                if (confidence) {
-                    confidenceCount[confidence] = (confidenceCount[confidence] || 0) + 1;
-                }
-            });
-            
-            // Process AI Curiosity Question
-            const curiosityCount = {};
-            const predefinedCuriosity = [
-                "AI for creator discovery",
-                "AI for campaign planning & briefing", 
-                "AI for reviewing creator content",
-                "AI-generated content (video, images, voice)",
-                "AI assistants & internal tooling",
-                "Ethical implications / disclosure guidelines",
-                "AI and brand safety",
-                "How creators themselves are using AI",
-                "AI and the future of creator platforms"
-            ];
-            
-            surveyResponses.forEach(response => {
-                const curiosity = response["Which areas of AI are you most curious to learn more about this season? (pick top 3)"];
-                if (curiosity) {
-                    predefinedCuriosity.forEach(option => {
-                        if (curiosity.toLowerCase().includes(option.toLowerCase())) {
-                            curiosityCount[option] = (curiosityCount[option] || 0) + 1;
-                        }
-                    });
-                }
-            });
-            
-            // Process Top Priority Question
-            const priorityCount = {};
-            const predefinedPriorities = [
-                "Learning from guest speakers",
-                "Swapping tactics/tools with peers",
-                "Discovering new AI use cases", 
-                "Connecting 1:1 with others in similar roles",
-                "Having a regular space to reflect and stay sharp"
-            ];
-            
-            surveyResponses.forEach(response => {
-                const priority = response["What's your top priority for this season? (pick 1)"];
-                if (priority) {
-                    predefinedPriorities.forEach(option => {
-                        if (priority.toLowerCase().includes(option.toLowerCase())) {
-                            priorityCount[option] = (priorityCount[option] || 0) + 1;
-                        }
-                    });
-                }
-            });
-            
-            // Process Creator Marketing Testing Question
-            const testingCount = {};
-            const predefinedTesting = [
-                "Creator Discovery & Vetting",
-                "Brief Generation & Campaign Planning",
-                "Outreach & Communication", 
-                "Content Review & Brand Safety",
-                "Payment, Contracting & Legal Automation",
-                "Performance Analysis & Reporting",
-                "Competitor Monitoring & Trend Tracking",
-                "Creative Co-Pilots for UGC",
-                "Marketplace Optimization (e.g. TikTok Shop, Amazon Influencer)",
-                "Internal Knowledge Systems & Institutional Memory"
-            ];
-            
-            surveyResponses.forEach(response => {
-                const testing = response["Which areas of creator marketing would you be most interested in testing AI tools for?"];
-                if (testing) {
-                    predefinedTesting.forEach(option => {
-                        if (testing.toLowerCase().includes(option.toLowerCase())) {
-                            testingCount[option] = (testingCount[option] || 0) + 1;
-                        }
-                    });
-                }
-            });
-            
-            return {
-                totalResponses,
-                aiUsage: Object.entries(aiUsageCount).map(([text, count]) => ({
-                    text, count, percentage: Math.round((count / totalResponses) * 100)
-                })).sort((a,b) => b.count - a.count),
-                tools: Object.entries(toolCount).map(([text, count]) => ({
-                    text, count, percentage: Math.round((count / totalResponses) * 100)  
-                })).sort((a,b) => b.count - a.count),
-                confidence: Object.entries(confidenceCount).map(([text, count]) => ({
-                    text: `${text} - ${text == '1' ? 'Not confident' : text == '2' ? 'Slightly confident' : text == '3' ? 'Somewhat confident' : text == '4' ? 'Very confident' : 'Extremely confident'}`,
-                    count, percentage: Math.round((count / totalResponses) * 100)
-                })).sort((a,b) => parseInt(a.text) - parseInt(b.text)),
-                curiosity: Object.entries(curiosityCount).map(([text, count]) => ({
-                    text, count, percentage: Math.round((count / totalResponses) * 100)
-                })).sort((a,b) => b.count - a.count),
-                priority: Object.entries(priorityCount).map(([text, count]) => ({
-                    text, count, percentage: Math.round((count / totalResponses) * 100)
-                })).sort((a,b) => b.count - a.count),
-                testing: Object.entries(testingCount).map(([text, count]) => ({
-                    text, count, percentage: Math.round((count / totalResponses) * 100)
-                })).sort((a,b) => b.count - a.count),
-                otherAIUsage: otherAIUsage.filter(item => item).join(', ')
-            };
-        }
+    fetch(endpoint)
+      .then(response => response.json())
+      .then(data => {
+        chartConfigs.forEach(config => {
+          const rawValues = data.map(row => row[config.key]).filter(Boolean);
+          let responses = [];
 
-        // Render the dashboard
-        function renderDashboard(data) {
-            let html = `
-                <div class="container">
-                    <div class="content">
-                        <div class="section">
-                            <div class="survey-question">
-                                <h2 class="section-title">How are you using AI in your work today?</h2>
-                                <div class="response-count">${data.totalResponses} responses</div>
-                                <div class="responses-container">
-            `;
-            
-            data.aiUsage.forEach(item => {
-                html += `
-                    <div class="response-item">
-                        <div class="response-bar">
-                            <div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-                        </div>
-                        <div class="response-content">
-                            <div class="response-text">${item.text}</div>
-                        </div>
-                        <div class="response-stats">
-                            <div class="response-percentage">${item.percentage}%</div>
-                            <div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-                        </div>
-                    </div>
-                `;
+          rawValues.forEach(val => {
+            val.split(/[;,\/]|\n/).forEach(part => {
+              const trimmed = part.trim();
+              if (trimmed) responses.push(trimmed);
             });
-            
-            html += `</div>`;
-            if (data.otherAIUsage) {
-                html += `
-                    <div class="other-responses">
-                        <div class="other-title">Other responses:</div>
-                        <div class="other-text">${data.otherAIUsage}</div>
-                    </div>
-                `;
-            }
-            html += `</div></div>`;
-            
-            // AI Tools section
-            html += `
-                <div class="section">
-                    <div class="survey-question">
-                        <h2 class="section-title">What's your go-to AI tool?</h2>
-                        <div class="response-count">${data.totalResponses} responses</div>
-                        <div class="responses-container">
-            `;
-            
-            data.tools.forEach(item => {
-                html += `
-                    <div class="response-item">
-                        <div class="response-bar">
-                            <div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-                        </div>
-                        <div class="response-content">
-                            <div class="response-text">${item.text}</div>
-                        </div>
-                        <div class="response-stats">
-                            <div class="response-percentage">${item.percentage}%</div>
-                            <div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `</div></div></div>`;
-            
-            // Confidence section  
-            html += `
-                <div class="section">
-                    <div class="survey-question">
-                        <h2 class="section-title">How confident are you in using AI tools in your creator marketing work?</h2>
-                        <div class="response-count">${data.totalResponses} responses</div>
-                        <div class="responses-container">
-            `;
-            
-            data.confidence.forEach(item => {
-                html += `
-                    <div class="response-item">
-                        <div class="response-bar">
-                            <div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-                        </div>
-                        <div class="response-content">
-                            <div class="response-text">${item.text}</div>
-                        </div>
-                        <div class="response-stats">
-                            <div class="response-percentage">${item.percentage}%</div>
-                            <div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `</div></div></div>`;
-            
-            // AI Curiosity section
-            html += `
-                <div class="section">
-                    <div class="survey-question">
-                        <h2 class="section-title">Which areas of AI are you most curious to learn more about this season?</h2>
-                        <div class="response-count">${data.totalResponses} responses</div>
-                        <div class="responses-container">
-            `;
-            
-            data.curiosity.forEach(item => {
-                html += `
-                    <div class="response-item">
-                        <div class="response-bar">
-                            <div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-                        </div>
-                        <div class="response-content">
-                            <div class="response-text">${item.text}</div>
-                        </div>
-                        <div class="response-stats">
-                            <div class="response-percentage">${item.percentage}%</div>
-                            <div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `</div></div></div>`;
-            
-            // Top Priority section
-            html += `
-                <div class="section">
-                    <div class="survey-question">
-                        <h2 class="section-title">What's your top priority for this season?</h2>
-                        <div class="response-count">${data.totalResponses} responses</div>
-                        <div class="responses-container">
-            `;
-            
-            data.priority.forEach(item => {
-                html += `
-                    <div class="response-item">
-                        <div class="response-bar">
-                            <div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-                        </div>
-                        <div class="response-content">
-                            <div class="response-text">${item.text}</div>
-                        </div>
-                        <div class="response-stats">
-                            <div class="response-percentage">${item.percentage}%</div>
-                            <div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `</div></div></div>`;
-            
-            // Creator Marketing Testing section
-            html += `
-                <div class="section">
-                    <div class="survey-question">
-                        <h2 class="section-title">Which areas of creator marketing would you be most interested in testing AI tools for?</h2>
-                        <div class="response-count">${data.totalResponses} responses</div>
-                        <div class="responses-container">
-            `;
-            
-            data.testing.forEach(item => {
-                html += `
-                    <div class="response-item">
-                        <div class="response-bar">
-                            <div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-                        </div>
-                        <div class="response-content">
-                            <div class="response-text">${item.text}</div>
-                        </div>
-                        <div class="response-stats">
-                            <div class="response-percentage">${item.percentage}%</div>
-                            <div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `</div></div></div>`;
-            
-            html += `
-                <div class="update-time">
-                    Last updated: ${new Date().toLocaleString()} • ${data.totalResponses} total responses • Live data
-                </div>
-                </div>
-                </div>
-            `;
-            
-            document.getElementById('dashboard-content').innerHTML = html;
-            
-            // Animate bars
-            setTimeout(function() {
-                const bars = document.querySelectorAll('.response-bar-fill');
-                bars.forEach(function(bar, index) {
-                    const width = bar.style.width;
-                    bar.style.width = '0%';
-                    setTimeout(function() {
-                        bar.style.width = width;
-                    }, 100 + (index * 50));
-                });
-            }, 100);
-        }
+          });
 
-        // Show loading state
-        function showLoading() {
-            document.getElementById('dashboard-content').innerHTML = `
-                <div class="container">
-                    <div class="content">
-                        <div class="section">
-                            <div class="survey-question">
-                                <h2 class="section-title">Loading live survey data...</h2>
-                                <div class="response-count">Fetching latest responses from Sheet2API</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
+          const countMap = {};
 
-        // Show error with fallback
-        function showError(error) {
-            console.log('🔄 Falling back to cached data due to API issues');
-            const fallbackData = processSurveyData(FALLBACK_DATA);
-            
-            let html = `
-                <div class="container">
-                    <div class="content">
-                        <div class="section">
-                            <div style="background: #2a1a1a; border: 1px solid #4a4a4a; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-                                <div style="color: #ffd700; font-size: 0.9em; margin-bottom: 8px;">
-                                    ⚠️ <strong>Using cached data</strong> - Live API temporarily unavailable
-                                </div>
-                                <div style="color: #9ca3af; font-size: 0.8em;">
-                                    Showing most recent survey data (${fallbackData.totalResponses} responses). 
-                                    <span style="color: #60a5fa; cursor: pointer;" onclick="location.reload()">Refresh page</span> to retry live data.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Render the dashboard with fallback data
-            renderDashboard(fallbackData);
-            
-            // Prepend the warning message
-            const content = document.getElementById('dashboard-content').innerHTML;
-            document.getElementById('dashboard-content').innerHTML = html + content;
-        }
+          if (config.normalize) {
+            const normalized = responses.map(r => {
+              const lc = r.toLowerCase();
+              if (lc.includes("chatgpt") || lc.includes("chat gpt")) return "Chat GPT";
+              if (lc.includes("claude")) return "Claude";
+              if (lc.includes("gemini")) return "Gemini";
+              return r;
+            });
 
-        // Main initialization
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🚀 Starting survey dashboard...');
-            showLoading();
-            
-            try {
-                console.log('📡 Attempting to fetch live data...');
-                const liveData = await fetchLiveData();
-                const processedData = processSurveyData(liveData);
-                
-                renderDashboard(processedData);
-                console.log('✅ Live dashboard rendered successfully!');
-                
-                // Update the "Last updated" to show it's live
-                const updateTime = document.querySelector('.update-time');
-                if (updateTime) {
-                    updateTime.innerHTML = `Last updated: ${new Date().toLocaleString()} • ${processedData.totalResponses} total responses • 🔴 Live data`;
-                }
-                
-            } catch (error) {
-                console.log('⚠️ Live data fetch failed, using fallback data');
-                console.error('API Error:', error.message);
-                showError(error);
-            }
+            normalized.forEach(r => {
+              countMap[r] = (countMap[r] || 0) + 1;
+            });
+
+            const chartData = Object.entries(countMap)
+              .filter(([label, count]) => count >= config.threshold && !["Chat GPT", "Claude", "Gemini"].includes(label))
+              .map(([label, count]) => ({ label, count }));
+
+            const knownLabels = ["Chat GPT", "Claude", "Gemini"];
+            knownLabels.forEach(label => {
+              if (countMap[label] >= config.threshold) {
+                chartData.unshift({ label, count: countMap[label] });
+              }
+            });
+
+            const others = Object.entries(countMap)
+              .filter(([label, count]) =>
+                count < config.threshold &&
+                !["Chat GPT", "Claude", "Gemini"].includes(label)
+              ).map(([label]) => label);
+
+            renderChart(config.label, chartData, others);
+          } else {
+            responses.forEach(r => {
+              countMap[r] = (countMap[r] || 0) + 1;
+            });
+
+            const chartData = Object.entries(countMap).map(([label, count]) => ({ label, count }));
+            renderChart(config.label, chartData);
+          }
         });
-    </script>ching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results, Generating images or video",
-                "What's your go-to AI tool (if any) in your current workflow?": "ElevenLabs, Claude, GPT, Gemini, n8n, zapier, heygen",
-                "How confident are you in using AI tools in your creator marketing work?": "5",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for campaign planning &amp; briefing, Lead enrichment and personalised outreach",
-                "What's your top priority for this season? (pick 1)": "Connecting 1:1 with others in similar roles",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Outreach &amp; Communication, Brief Generation &amp; Campaign Planning, Performance Analysis &amp; Reporting"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chat GPT and Perplexity",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for reviewing creator content, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Having a regular space to reflect and stay sharp",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery &amp; Vetting, Brief Generation &amp; Campaign Planning, Content Review &amp; Brand Safety, Performance Analysis &amp; Reporting, Competitor Monitoring &amp; Trend Tracking"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Writing emails, captions, or campaign copy, Discovering or researching creators, Drafting or reviewing creative briefs",
-                "What's your go-to AI tool (if any) in your current workflow?": "ChatGPT, Favikon",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Connecting 1:1 with others in similar roles",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery &amp; Vetting, Outreach &amp; Communication, Performance Analysis &amp; Reporting, Internal Knowledge Systems &amp; Institutional Memory"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, used in Brand Safety tools we use",
-                "What's your go-to AI tool (if any) in your current workflow?": "n/a",
-                "How confident are you in using AI tools in your creator marketing work?": "3",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI assistants &amp; internal tooling, AI and brand safety, How others are utilizing AI for their workflows. Example: a look into Teachable's use of Claude for their dashboards",
-                "What's your top priority for this season? (pick 1)": "Connecting 1:1 with others in similar roles",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Internal Knowledge Systems &amp; Institutional Memory, Brief Generation &amp; Campaign Planning, Creator Discovery &amp; Vetting, Performance Analysis &amp; Reporting"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chat GPT",
-                "How confident are you in using AI tools in your creator marketing work?": "2",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for campaign planning &amp; briefing",
-                "What's your top priority for this season? (pick 1)": "Learning from guest speakers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Brief Generation &amp; Campaign Planning, Creator Discovery &amp; Vetting"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Analyzing campaign results, Generating images or video",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chatgpt",
-                "How confident are you in using AI tools in your creator marketing work?": "5",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI-generated content (video, images, voice), AI assistants &amp; internal tooling, How creators themselves are using AI",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Performance Analysis &amp; Reporting, Internal Knowledge Systems &amp; Institutional Memory, Outreach &amp; Communication"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Writing emails, captions, or campaign copy, Discovering or researching creators",
-                "What's your go-to AI tool (if any) in your current workflow?": "ChatGPT",
-                "How confident are you in using AI tools in your creator marketing work?": "3",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for campaign planning &amp; briefing, AI for reviewing creator content, AI assistants &amp; internal tooling",
-                "What's your top priority for this season? (pick 1)": "Connecting 1:1 with others in similar roles",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": ""
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Generating images or video",
-                "What's your go-to AI tool (if any) in your current workflow?": "ChatGPT and Spotter Studio",
-                "How confident are you in using AI tools in your creator marketing work?": "5",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI assistants &amp; internal tooling, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Outreach &amp; Communication, Performance Analysis &amp; Reporting, Marketplace Optimization (e.g. TikTok Shop, Amazon Influencer)"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators",
-                "What's your go-to AI tool (if any) in your current workflow?": "Don't have one!",
-                "How confident are you in using AI tools in your creator marketing work?": "1",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for campaign planning &amp; briefing, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery &amp; Vetting, Brief Generation &amp; Campaign Planning, Outreach &amp; Communication, Content Review &amp; Brand Safety, Other"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy",
-                "What's your go-to AI tool (if any) in your current workflow?": "ChatGPT",
-                "How confident are you in using AI tools in your creator marketing work?": "2",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI assistants &amp; internal tooling, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery &amp; Vetting, Outreach &amp; Communication, Content Review &amp; Brand Safety, Payment, Contracting &amp; Legal Automation"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chat GPT",
-                "How confident are you in using AI tools in your creator marketing work?": "4",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for reviewing creator content, AI assistants &amp; internal tooling, How creators themselves are using AI",
-                "What's your top priority for this season? (pick 1)": "Swapping tactics/tools with peers",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery &amp; Vetting, Outreach &amp; Communication, Content Review &amp; Brand Safety, Performance Analysis &amp; Reporting"
-            },
-            {
-                "Which of the following best describes how you're using AI in your work today? (select all that apply)": "Discovering or researching creators, Drafting or reviewing creative briefs, Writing emails, captions, or campaign copy, Generating images or video",
-                "What's your go-to AI tool (if any) in your current workflow?": "Chatgpt, Heygen, Sora",
-                "How confident are you in using AI tools in your creator marketing work?": "3",
-                "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "AI for creator discovery, AI for reviewing creator content, AI and the future of creator platforms",
-                "What's your top priority for this season? (pick 1)": "Discovering new AI use cases",
-                "Which areas of creator marketing would you be most interested in testing AI tools for?": "Creator Discovery &amp; Vetting, Performance Analysis &amp; Reporting, Internal Knowledge Systems &amp; Institutional Memory"
-            }
-        ];
+      });
 
-        // Process the real survey data
-        function processSurveyData() {
-            const totalResponses = SURVEY_RESPONSES.length;
-            
-            // Process AI Usage Question
-            const aiUsageCount = {};
-            const predefinedAIUsage = [
-                "Discovering or researching creators",
-                "Drafting or reviewing creative briefs", 
-                "Writing emails, captions, or campaign copy",
-                "Analyzing campaign results",
-                "Generating images or video",
-                "I'm not using AI at work yet"
-            ];
-            
-            let otherAIUsage = [];
-            
-            SURVEY_RESPONSES.forEach(response =&gt; {
-                const usage = response["Which of the following best describes how you're using AI in your work today? (select all that apply)"];
-                if (usage) {
-                    predefinedAIUsage.forEach(option =&gt; {
-                        if (usage.toLowerCase().includes(option.toLowerCase())) {
-                            aiUsageCount[option] = (aiUsageCount[option] || 0) + 1;
-                        }
-                    });
-                    
-                    // Capture other responses
-                    let remainingText = usage;
-                    predefinedAIUsage.forEach(option =&gt; {
-                        remainingText = remainingText.replace(new RegExp(option, 'gi'), '');
-                    });
-                    const cleaned = remainingText.split(',').map(s =&gt; s.trim()).filter(s =&gt; s &amp;&amp; s.length &gt; 2);
-                    otherAIUsage.push(...cleaned);
-                }
-            });
-            
-            // Process AI Tools Question
-            const toolCount = {};
-            SURVEY_RESPONSES.forEach(response =&gt; {
-                const tool = response["What's your go-to AI tool (if any) in your current workflow?"];
-                if (tool) {
-                    const normalized = tool.toLowerCase();
-                    if (normalized.includes('chatgpt') || normalized.includes('chat gpt')) {
-                        toolCount['ChatGPT'] = (toolCount['ChatGPT'] || 0) + 1;
-                    } else if (normalized.includes('claude')) {
-                        toolCount['Claude'] = (toolCount['Claude'] || 0) + 1;
-                    } else if (normalized.includes('gemini')) {
-                        toolCount['Gemini'] = (toolCount['Gemini'] || 0) + 1;
-                    } else if (normalized.includes('other') || normalized.includes('n/a') || normalized.includes("don't")) {
-                        toolCount['Other/None'] = (toolCount['Other/None'] || 0) + 1;
-                    } else {
-                        toolCount['Other'] = (toolCount['Other'] || 0) + 1;
-                    }
-                }
-            });
-            
-            // Process Confidence Question
-            const confidenceCount = {};
-            SURVEY_RESPONSES.forEach(response =&gt; {
-                const confidence = response["How confident are you in using AI tools in your creator marketing work?"];
-                if (confidence) {
-                    confidenceCount[confidence] = (confidenceCount[confidence] || 0) + 1;
-                }
-            });
-            
-            // Process AI Curiosity Question
-            const curiosityCount = {};
-            const predefinedCuriosity = [
-                "AI for creator discovery",
-                "AI for campaign planning &amp; briefing", 
-                "AI for reviewing creator content",
-                "AI-generated content (video, images, voice)",
-                "AI assistants &amp; internal tooling",
-                "Ethical implications / disclosure guidelines",
-                "AI and brand safety",
-                "How creators themselves are using AI",
-                "AI and the future of creator platforms"
-            ];
-            
-            SURVEY_RESPONSES.forEach(response =&gt; {
-                const curiosity = response["Which areas of AI are you most curious to learn more about this season? (pick top 3)"];
-                if (curiosity) {
-                    predefinedCuriosity.forEach(option =&gt; {
-                        if (curiosity.toLowerCase().includes(option.toLowerCase())) {
-                            curiosityCount[option] = (curiosityCount[option] || 0) + 1;
-                        }
-                    });
-                }
-            });
-            
-            // Process Top Priority Question
-            const priorityCount = {};
-            const predefinedPriorities = [
-                "Learning from guest speakers",
-                "Swapping tactics/tools with peers",
-                "Discovering new AI use cases", 
-                "Connecting 1:1 with others in similar roles",
-                "Having a regular space to reflect and stay sharp"
-            ];
-            
-            SURVEY_RESPONSES.forEach(response =&gt; {
-                const priority = response["What's your top priority for this season? (pick 1)"];
-                if (priority) {
-                    predefinedPriorities.forEach(option =&gt; {
-                        if (priority.toLowerCase().includes(option.toLowerCase())) {
-                            priorityCount[option] = (priorityCount[option] || 0) + 1;
-                        }
-                    });
-                }
-            });
-            
-            // Process Creator Marketing Testing Question
-            const testingCount = {};
-            const predefinedTesting = [
-                "Creator Discovery &amp; Vetting",
-                "Brief Generation &amp; Campaign Planning",
-                "Outreach &amp; Communication", 
-                "Content Review &amp; Brand Safety",
-                "Payment, Contracting &amp; Legal Automation",
-                "Performance Analysis &amp; Reporting",
-                "Competitor Monitoring &amp; Trend Tracking",
-                "Creative Co-Pilots for UGC",
-                "Marketplace Optimization (e.g. TikTok Shop, Amazon Influencer)",
-                "Internal Knowledge Systems &amp; Institutional Memory"
-            ];
-            
-            SURVEY_RESPONSES.forEach(response =&gt; {
-                const testing = response["Which areas of creator marketing would you be most interested in testing AI tools for?"];
-                if (testing) {
-                    predefinedTesting.forEach(option =&gt; {
-                        if (testing.toLowerCase().includes(option.toLowerCase())) {
-                            testingCount[option] = (testingCount[option] || 0) + 1;
-                        }
-                    });
-                }
-            });
-            
-            return {
-                totalResponses,
-                aiUsage: Object.entries(aiUsageCount).map(([text, count]) =&gt; ({
-                    text, count, percentage: Math.round((count / totalResponses) * 100)
-                })).sort((a,b) =&gt; b.count - a.count),
-                tools: Object.entries(toolCount).map(([text, count]) =&gt; ({
-                    text, count, percentage: Math.round((count / totalResponses) * 100)  
-                })).sort((a,b) =&gt; b.count - a.count),
-                confidence: Object.entries(confidenceCount).map(([text, count]) =&gt; ({
-                    text: `${text} - ${text == '1' ? 'Not confident' : text == '2' ? 'Slightly confident' : text == '3' ? 'Somewhat confident' : text == '4' ? 'Very confident' : 'Extremely confident'}`,
-                    count, percentage: Math.round((count / totalResponses) * 100)
-                })).sort((a,b) =&gt; parseInt(a.text) - parseInt(b.text)),
-                curiosity: Object.entries(curiosityCount).map(([text, count]) =&gt; ({
-                    text, count, percentage: Math.round((count / totalResponses) * 100)
-                })).sort((a,b) =&gt; b.count - a.count),
-                priority: Object.entries(priorityCount).map(([text, count]) =&gt; ({
-                    text, count, percentage: Math.round((count / totalResponses) * 100)
-                })).sort((a,b) =&gt; b.count - a.count),
-                testing: Object.entries(testingCount).map(([text, count]) =&gt; ({
-                    text, count, percentage: Math.round((count / totalResponses) * 100)
-                })).sort((a,b) =&gt; b.count - a.count),
-                otherAIUsage: otherAIUsage.filter(item =&gt; item).join(', ')
-            };
+    function renderChart(title, data, otherResponses = []) {
+      const container = document.createElement("div");
+      container.className = "chart-container";
+
+      const heading = document.createElement("h2");
+      heading.textContent = title;
+      container.appendChild(heading);
+
+      const canvas = document.createElement("canvas");
+      container.appendChild(canvas);
+
+      if (otherResponses.length) {
+        const div = document.createElement("div");
+        div.className = "other-responses";
+        div.innerHTML = `<strong>Other responses:</strong> ${otherResponses.join(", ")}`;
+        container.appendChild(div);
+      }
+
+      document.getElementById("dashboard").appendChild(container);
+
+      new Chart(canvas.getContext("2d"), {
+        type: "bar",
+        data: {
+          labels: data.map(d => d.label),
+          datasets: [{
+            label: "# of responses",
+            data: data.map(d => d.count),
+            backgroundColor: "#29d6bc"
+          }]
+        },
+        options: {
+          responsive: true,
+          animation: {
+            duration: 1000,
+            easing: "easeOutBounce"
+          },
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              ticks: { color: "#ccc" }
+            },
+            y: {
+              ticks: { color: "#ccc" },
+              beginAtZero: true
+            }
+          }
         }
-
-        // Render dashboard with real data
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Processing real survey data...');
-            const data = processSurveyData();
-            console.log(`Processing ${data.totalResponses} survey responses`);
-            
-            let html = `
-                <div class="container">
-<div class="content">
-<div class="section">
-<div class="survey-question">
-<h2 class="section-title">How are you using AI in your work today?</h2>
-<div class="response-count">${data.totalResponses} responses</div>
-<div class="responses-container">
-            `;
-            
-            data.aiUsage.forEach(item =&gt; {
-                html += `
-                    <div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">${item.text}</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">${item.percentage}%</div>
-<div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-</div>
-</div>
-                `;
-            });
-            
-            html += `</div>`;
-            if (data.otherAIUsage) {
-                html += `
-                    <div class="other-responses">
-<div class="other-title">Other responses:</div>
-<div class="other-text">${data.otherAIUsage}</div>
-</div>
-                `;
-            }
-            html += `</div></div>`;
-            
-            // AI Tools section
-            html += `
-                <div class="section">
-<div class="survey-question">
-<h2 class="section-title">What's your go-to AI tool?</h2>
-<div class="response-count">${data.totalResponses} responses</div>
-<div class="responses-container">
-            `;
-            
-            data.tools.forEach(item =&gt; {
-                html += `
-                    <div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">${item.text}</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">${item.percentage}%</div>
-<div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-</div>
-</div>
-                `;
-            });
-            
-            html += `</div></div></div>`;
-            
-            // AI Curiosity section
-            html += `
-                <div class="section">
-<div class="survey-question">
-<h2 class="section-title">Which areas of AI are you most curious to learn more about this season?</h2>
-<div class="response-count">${data.totalResponses} responses</div>
-<div class="responses-container">
-            `;
-            
-            data.curiosity.forEach(item =&gt; {
-                html += `
-                    <div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">${item.text}</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">${item.percentage}%</div>
-<div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-</div>
-</div>
-                `;
-            });
-            
-            html += `</div></div></div>`;
-            
-            // Top Priority section
-            html += `
-                <div class="section">
-<div class="survey-question">
-<h2 class="section-title">What's your top priority for this season?</h2>
-<div class="response-count">${data.totalResponses} responses</div>
-<div class="responses-container">
-            `;
-            
-            data.priority.forEach(item =&gt; {
-                html += `
-                    <div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">${item.text}</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">${item.percentage}%</div>
-<div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-</div>
-</div>
-                `;
-            });
-            
-            html += `</div></div></div>`;
-            
-            // Creator Marketing Testing section
-            html += `
-                <div class="section">
-<div class="survey-question">
-<h2 class="section-title">Which areas of creator marketing would you be most interested in testing AI tools for?</h2>
-<div class="response-count">${data.totalResponses} responses</div>
-<div class="responses-container">
-            `;
-            
-            data.testing.forEach(item =&gt; {
-                html += `
-                    <div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">${item.text}</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">${item.percentage}%</div>
-<div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-</div>
-</div>
-                `;
-            });
-            
-            html += `</div></div></div>`;
-            
-            // Confidence section  
-            html += `
-                <div class="section">
-<div class="survey-question">
-<h2 class="section-title">How confident are you in using AI tools in your creator marketing work?</h2>
-<div class="response-count">${data.totalResponses} responses</div>
-<div class="responses-container">
-            `;
-            
-            data.confidence.forEach(item =&gt; {
-                html += `
-                    <div class="response-item">
-<div class="response-bar">
-<div class="response-bar-fill" style="width: ${item.percentage}%;"></div>
-</div>
-<div class="response-content">
-<div class="response-text">${item.text}</div>
-</div>
-<div class="response-stats">
-<div class="response-percentage">${item.percentage}%</div>
-<div class="response-number">${item.count} response${item.count !== 1 ? 's' : ''}</div>
-</div>
-</div>
-                `;
-            });
-            
-            html += `</div></div></div>`;
-            
-            html += `
-                <div class="update-time">
-                    Last updated: ${new Date().toLocaleString()} • ${data.totalResponses} total responses
-                </div>
-</div>
-</div>
-            `;
-            
-            document.getElementById('dashboard-content').innerHTML = html;
-            
-            // Animate bars
-            setTimeout(function() {
-                const bars = document.querySelectorAll('.response-bar-fill');
-                bars.forEach(function(bar, index) {
-                    const width = bar.style.width;
-                    bar.style.width = '0%';
-                    setTimeout(function() {
-                        bar.style.width = width;
-                    }, 100 + (index * 50));
-                });
-            }, 100);
-            
-            console.log('Dashboard rendered with real data!');
-        });
-    , index) {
-                    const width = bar.style.width;
-                    bar.style.width = '0%';
-                    setTimeout(function() {
-                        bar.style.width = width;
-                    }, 100 + (index * 100));
-                });
-            }, 200);
-        });
-    
-</div></div></div></body>
+      });
+    }
+  </script>
+</body>
 </html>
