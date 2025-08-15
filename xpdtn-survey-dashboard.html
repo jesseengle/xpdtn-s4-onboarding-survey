@@ -1,59 +1,46 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XPDTN AI Survey Dashboard</title>
+  <title>XPDTN Season 4 AI Survey</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-      background-color: #121212;
-      color: #f5f5f5;
       margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
       padding: 2rem;
     }
-
     h1 {
+      color: #00ffe0;
       text-align: center;
-      color: #00d1b2;
-      margin-bottom: 2rem;
-    }
-
-    .question-block {
       margin-bottom: 3rem;
     }
-
-    .question-title {
-      font-size: 1.25rem;
-      font-weight: 600;
+    .chart-container {
+      margin-bottom: 3rem;
+    }
+    .question {
+      font-size: 1.2rem;
       margin-bottom: 1rem;
     }
-
-    .bar-container {
-      background-color: #333;
-      border-radius: 6px;
-      margin: 0.25rem 0;
-      overflow: hidden;
-    }
-
     .bar {
-      background: linear-gradient(90deg, #00d1b2, #00b8a9);
-      color: #fff;
-      padding: 0.5rem 1rem;
-      font-size: 0.95rem;
-      white-space: nowrap;
-      overflow: hidden;
-      animation: growBar 1.5s ease-out forwards;
-      transform: scaleX(0);
-      transform-origin: left;
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
     }
-
-    @keyframes growBar {
-      to {
-        transform: scaleX(1);
-      }
+    .bar-label {
+      width: 30%;
+    }
+    .bar-fill {
+      height: 20px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #00ffe0, #0077ff);
+      transition: width 1s ease-in-out;
+    }
+    .bar-value {
+      margin-left: 0.5rem;
     }
   </style>
 </head>
@@ -62,68 +49,71 @@
   <div id="dashboard"></div>
 
   <script>
-    const endpoint = "https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live";
-
-    const questions = {
-      "Which of the following best describes how you’re using AI in your work today? (select all that apply)": "How you’re using AI today",
-      "What’s your go-to AI tool (if any) in your current workflow?": "Go-to AI Tool",
-      "How confident are you in using AI tools in your creator marketing work?": "Confidence using AI",
-      "Which areas of AI are you most curious to learn more about this season? (pick top 3)": "Top 3 AI Topics",
-      "What’s your top priority for this season? (pick 1)": "Top Priority",
-      "Which areas of creator marketing would you be most interested in testing AI tools for?": "Where to Test AI",
-    };
+    const endpoint = 'https://sheet2api.com/v1/eVtBQ3lcSgaF/xpdtn-s4-onboarding-survey-live';
+    const COLUMNS = [
+      'Which of the following best describes how you’re using AI in your work today? (select all that apply)',
+      'What’s your go-to AI tool (if any) in your current workflow?',
+      'How confident are you in using AI tools in your creator marketing work?',
+      'Which areas of AI are you most curious to learn more about this season? (pick top 3)',
+      'What’s your top priority for this season? (pick 1)',
+      'Which areas of creator marketing would you be most interested in testing AI tools for?'
+    ];
 
     async function loadSurveyData() {
       try {
         const res = await fetch(endpoint);
         const data = await res.json();
-        const dashboard = document.getElementById("dashboard");
 
-        Object.entries(questions).forEach(([key, title]) => {
-          const answerCounts = {};
+        const dashboard = document.getElementById('dashboard');
 
+        COLUMNS.forEach(column => {
+          const counts = {};
           data.forEach(row => {
-            let answers = row[key];
-            if (!answers) return;
-            if (typeof answers === 'string') {
-              answers = answers.split(/,|\n|\r/);
-            }
-            answers.forEach(ans => {
-              const cleaned = ans.trim();
-              if (cleaned) {
-                answerCounts[cleaned] = (answerCounts[cleaned] || 0) + 1;
-              }
+            if (!row[column]) return;
+            const answers = row[column].split(',').map(ans => ans.trim());
+            answers.forEach(answer => {
+              if (answer) counts[answer] = (counts[answer] || 0) + 1;
             });
           });
 
-          const sortedAnswers = Object.entries(answerCounts).sort((a, b) => b[1] - a[1]);
-          const total = Object.values(answerCounts).reduce((a, b) => a + b, 0);
+          const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
-          const block = document.createElement("div");
-          block.className = "question-block";
-          const heading = document.createElement("div");
-          heading.className = "question-title";
-          heading.textContent = title;
-          block.appendChild(heading);
+          const container = document.createElement('div');
+          container.className = 'chart-container';
+          const question = document.createElement('div');
+          question.className = 'question';
+          question.textContent = column;
+          container.appendChild(question);
 
-          sortedAnswers.forEach(([answer, count]) => {
+          Object.entries(counts).sort((a, b) => b[1] - a[1]).forEach(([key, count]) => {
             const percent = ((count / total) * 100).toFixed(1);
-            const barContainer = document.createElement("div");
-            barContainer.className = "bar-container";
 
-            const bar = document.createElement("div");
-            bar.className = "bar";
-            bar.style.width = percent + "%";
-            bar.textContent = `${answer} (${count})`;
+            const bar = document.createElement('div');
+            bar.className = 'bar';
 
-            barContainer.appendChild(bar);
-            block.appendChild(barContainer);
+            const label = document.createElement('div');
+            label.className = 'bar-label';
+            label.textContent = key;
+
+            const fill = document.createElement('div');
+            fill.className = 'bar-fill';
+            fill.style.width = `${percent}%`;
+
+            const value = document.createElement('div');
+            value.className = 'bar-value';
+            value.textContent = `${percent}%`;
+
+            bar.appendChild(label);
+            bar.appendChild(fill);
+            bar.appendChild(value);
+
+            container.appendChild(bar);
           });
 
-          dashboard.appendChild(block);
+          dashboard.appendChild(container);
         });
       } catch (err) {
-        document.getElementById("dashboard").innerText = "Error loading data";
+        document.getElementById('dashboard').innerText = 'Error loading data';
         console.error(err);
       }
     }
